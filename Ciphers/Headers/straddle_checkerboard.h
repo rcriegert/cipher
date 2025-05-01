@@ -2,12 +2,12 @@
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
 unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
-    // NEED TO BRING IN line_H_P 50-59
+    // TODO - Add in line_H_P 50-59
 
-    // Straddling Checkerboard Creation Start
+    // Straddling Checkerboard Top Line Creation Start
     int pos;
     int num;
-    int line_Straddle[10];
+    int straddle_line[10];
     for (int i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
@@ -18,27 +18,9 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
             }
         }
         line_H_P[pos] += 10;
-        line_Straddle[pos - 50] = i;
+        straddle_line[pos - 50] = i;
     }
-
-    // Top Row
-    int straddle_array[28];
-    int counter = 0;
-    for (int i = 0; i < 10; i++) {
-        if (i != straddle_space_1 && i != straddle_space_2) {
-            straddle_array[counter] = line_Straddle[i];
-            counter++;
-        }
-    }
-    // Middle Row
-    for (int i = 0; i < 10; i++) {
-        straddle_array[i+8] = (straddle_space_1*10) + i;
-    }
-    // Bottom Row
-    for (int i = 0; i < 10; i++) {
-        straddle_array[i+18] = (straddle_space_2*10) + i;
-    }
-    // Straddling Checkerboard Creation End
+    // Straddling Checkerboard Top Line Creation End
 
 
 
@@ -46,21 +28,51 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
     unsigned char* ciphertext = malloc(plaintext_len * 2 * sizeof(unsigned char));
     pos = 0;
     int ciphertext_size = plaintext_len * 2;
-    unsigned char number = 0;
+    int completed_loop;
+    // Add number support
     for (int i = 0; i < plaintext_len; i++) {
-        // check row
-        int len = 1;
-        for (int j = 0; j < 8; j++) {
-            if (plaintext[i] == straddle_alphabet[j]) {
-                len++;
-            }
-        }
-        // TODO - check number
-        // Add to straddle TODO - Support number
-        if (pos + len >= ciphertext_size) {
+        completed_loop = 0;
+        // Realloc check
+        if (pos + 5 >= ciphertext_size) {
             // TODO - realloc double
         }
-        // Add straddle to ciphertext (WHAT IS BEST WAY?!??!?!)
+
+        // check row
+
+        for (int j = 0; j < 8; j++) {
+            if (plaintext[i] == straddle_alphabet[j]) {
+                int addition = 0;
+                if (j >= straddle_space_1) {
+                    addition++;
+                }
+                if (j >= straddle_space_2) {
+                    addition++;
+                }
+                ciphertext[pos] = straddle_line[j + addition];
+                pos++;
+                completed_loop = 1;
+            }
+        }
+        if (completed_loop == 0) {
+            if ((plaintext[i] >= 65 && plaintext[i] <= 90) || (plaintext[i] == 46 || plaintext[i] == 47)) {
+                // add support if currently number
+                // if upper alphabet not top row or . or /
+                for (int j = 8; j < 28; j++) {
+                    if (plaintext[i] == straddle_alphabet[j]) {
+                        if (j >= 18) {
+                            ciphertext[pos] = straddle_space_1;
+                        }
+                        else {
+                            ciphertext[pos] = straddle_space_2;
+                        }
+                        pos++;
+                        ciphertext[pos] = straddle_line[(j-8)%10];
+                        pos++;
+                    }
+                }
+            }
+            // introducing number
+        }
 
     }
     // Encode with Straddle End
