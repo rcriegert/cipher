@@ -3,6 +3,7 @@
 
 unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
     // TODO - Add in line_H_P 50-59
+    // Assumes top line does not have / or .
 
     // Straddling Checkerboard Top Line Creation Start
     int pos;
@@ -30,6 +31,7 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
     int ciphertext_size = plaintext_len * 2;
     int completed_loop;
     // Add number support
+    int number = 0;
     for (int i = 0; i < plaintext_len; i++) {
         completed_loop = 0;
         // Realloc check
@@ -37,8 +39,7 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
             // TODO - realloc double
         }
 
-        // check row
-
+        // Check top row
         for (int j = 0; j < 8; j++) {
             if (plaintext[i] == straddle_alphabet[j]) {
                 int addition = 0;
@@ -53,10 +54,27 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
                 completed_loop = 1;
             }
         }
+        // Not top row
         if (completed_loop == 0) {
+            // If upper alphabet not top row or . or /
             if ((plaintext[i] >= 65 && plaintext[i] <= 90) || (plaintext[i] == 46 || plaintext[i] == 47)) {
                 // add support if currently number
-                // if upper alphabet not top row or . or /
+                if (number == 1) {
+                    for (int j = 8; j < 28; j++) {
+                        if ('/' == straddle_alphabet[j]) {
+                            if (j >= 18) {
+                                ciphertext[pos] = straddle_space_1;
+                            }
+                            else {
+                                ciphertext[pos] = straddle_space_2;
+                            }
+                            pos++;
+                            ciphertext[pos] = straddle_line[(j-8)%10];
+                            pos++;
+                        }
+                    }
+                    number = 0;
+                }
                 for (int j = 8; j < 28; j++) {
                     if (plaintext[i] == straddle_alphabet[j]) {
                         if (j >= 18) {
@@ -71,7 +89,31 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
                     }
                 }
             }
-            // introducing number
+            // Number
+            else {
+                if (number == 0) {
+                    for (int j = 8; j < 28; j++) {
+                        if ('/' == straddle_alphabet[j]) {
+                            if (j >= 18) {
+                                ciphertext[pos] = straddle_space_1;
+                            }
+                            else {
+                                ciphertext[pos] = straddle_space_2;
+                            }
+                            pos++;
+                            ciphertext[pos] = straddle_line[(j-8)%10];
+                            pos++;
+                        }
+                    }
+                    number = 1;
+                }
+                ciphertext[pos] = plaintext[i];
+                pos++;
+                ciphertext[pos] = plaintext[i];
+                pos++;
+                ciphertext[pos] = plaintext[i];
+                pos++;
+            }
         }
 
     }
