@@ -215,18 +215,13 @@ int main(int argc, char** argv)
 
     // Lines Q-R Sequencing End
 
-    for (int i = 0; i < 60; i++) {
-        if (i%10 == 0) {
-            printf("\n");
-        }
-        printf("%d ", line_H_P[i]);
-    }
+
 
     // Encode with Straddle Start
-    unsigned char* text_after_straddle = straddle_checkerboard(plaintext, strlen(plaintext), line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2);
+    int ciphertext_len;
+    unsigned char* text_after_straddle = straddle_checkerboard(plaintext, strlen(plaintext), line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len);
     // Encode with Straddle End
-
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < ciphertext_len; i++) {
         printf("%d ", text_after_straddle[i]);
     }
 
