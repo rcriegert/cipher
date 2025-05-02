@@ -1,8 +1,7 @@
 #ifndef STRADDLE_CHECKERBOARD_H_INCLUDED
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
-unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
-    // TODO - Add in line_H_P 50-59
+unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int line_H_P[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
     // Assumes top line does not have / or .
 
     // Straddling Checkerboard Top Line Creation Start
@@ -22,8 +21,11 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
         straddle_line[pos - 50] = i;
     }
     // Straddling Checkerboard Top Line Creation End
-
-
+    printf("\n");
+    for (int i = 0; i < 10; i++) {
+        printf("%d ", straddle_line[i]);
+    }
+    printf("\n");
 
     // Encode with Straddle Start
     unsigned char* ciphertext = malloc(plaintext_len * 2 * sizeof(unsigned char));
@@ -36,7 +38,11 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
         completed_loop = 0;
         // Realloc check
         if (pos + 5 >= ciphertext_size) {
-            // TODO - realloc double
+            unsigned char* temp_alloc;
+            // Add realloc successful check
+            temp_alloc = realloc(ciphertext, ciphertext_size * 2 * sizeof(unsigned char));
+            ciphertext = temp_alloc;
+            ciphertext_size *= 2;
         }
 
         // Check top row
@@ -63,10 +69,10 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
                     for (int j = 8; j < 28; j++) {
                         if ('/' == straddle_alphabet[j]) {
                             if (j >= 18) {
-                                ciphertext[pos] = straddle_space_1;
+                                ciphertext[pos] = straddle_line[straddle_space_2];
                             }
                             else {
-                                ciphertext[pos] = straddle_space_2;
+                                ciphertext[pos] = straddle_line[straddle_space_1];
                             }
                             pos++;
                             ciphertext[pos] = straddle_line[(j-8)%10];
@@ -78,10 +84,10 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
                 for (int j = 8; j < 28; j++) {
                     if (plaintext[i] == straddle_alphabet[j]) {
                         if (j >= 18) {
-                            ciphertext[pos] = straddle_space_1;
+                            ciphertext[pos] = straddle_line[straddle_space_2];
                         }
                         else {
-                            ciphertext[pos] = straddle_space_2;
+                            ciphertext[pos] = straddle_line[straddle_space_1];
                         }
                         pos++;
                         ciphertext[pos] = straddle_line[(j-8)%10];
@@ -118,6 +124,8 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
 
     }
     // Encode with Straddle End
+
+    return ciphertext;
 }
 
 #endif // STRADDLE_CHECKERBOARD_H_INCLUDED

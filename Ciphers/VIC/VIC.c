@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "../Headers/chain_addition.h"
+#include "../Headers/straddle_checkerboard.h"
 
 // TODO - Make this accept passed arguments
 int main(int argc, char** argv)
@@ -27,6 +28,7 @@ int main(int argc, char** argv)
     // Note - ss1 < ss2
     int straddle_space_1 = 2;
     int straddle_space_2 = 6;
+    unsigned char* plaintext = "WEAREPLEASEDTOHEAROFYOURSUCCESSINESTABLISHINGYOURFALSEIDENTITYYOUWILLBESENTSOMEMONEYTOCOVEREXPENSESWITHINAMONTH";
 
     // Line F Start
 
@@ -213,65 +215,25 @@ int main(int argc, char** argv)
 
     // Lines Q-R Sequencing End
 
-    // This section copied into .h file (TAKE line_H_P 50-59 there)
-    // Straddling Checkerboard Creation Start
-
-    int line_Straddle[10];
-    for (int i = 0; i < 10; i++) {
-        pos = 0;
-        num = 10;
-        for (int j = 50; j < 60; j++) {
-            if (line_H_P[j] < num) {
-                pos = j;
-                num = line_H_P[j];
-            }
+    for (int i = 0; i < 60; i++) {
+        if (i%10 == 0) {
+            printf("\n");
         }
-        line_H_P[pos] += 10;
-        line_Straddle[pos - 50] = i;
+        printf("%d ", line_H_P[i]);
     }
-
-    // Top Row
-    int straddle_array[28];
-    int counter = 0;
-    for (int i = 0; i < 10; i++) {
-        if (i != straddle_space_1 && i != straddle_space_2) {
-            straddle_array[counter] = line_Straddle[i];
-            counter++;
-        }
-    }
-    // Middle Row
-    for (int i = 0; i < 10; i++) {
-        straddle_array[i+8] = (line_Straddle[straddle_space_1]*10) + line_Straddle[i];
-    }
-    // Bottom Row
-    for (int i = 0; i < 10; i++) {
-        straddle_array[i+18] = (line_Straddle[straddle_space_2]*10) + line_Straddle[i];
-    }
-
-    // Straddling Checkerboard Creation End
-
-
-    // Note - H_P 50-59 off by +10
 
     // Encode with Straddle Start
-
+    unsigned char* text_after_straddle = straddle_checkerboard(plaintext, strlen(plaintext), line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2);
     // Encode with Straddle End
 
-    // IDK WHAT THIS DOES HERE?
-
     for (int i = 0; i < 10; i++) {
-        printf("%d ", line_Straddle[i]);
+        printf("%d ", text_after_straddle[i]);
     }
 
-    printf("\n");
-
-    for (int i = 0; i < 28; i++) {
-        if (i == 8 || i == 18) {printf("\n");}
-        printf("%d ", straddle_array[i]);
-    }
 
     // Cleanup
 
+    free(text_after_straddle);
     free(line_Q_R_Sequenced);
     free(line_Q_R);
 
