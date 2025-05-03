@@ -219,7 +219,9 @@ int main(int argc, char** argv)
 
     // Encode with Straddle Start
     int ciphertext_len;
-    unsigned char* text_after_straddle = straddle_checkerboard(plaintext, strlen(plaintext), line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len);
+
+    unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
+
     // Encode with Straddle End
     for (int i = 0; i < ciphertext_len; i++) {
         printf("%d ", text_after_straddle[i]);

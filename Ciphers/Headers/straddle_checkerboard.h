@@ -1,6 +1,10 @@
 #ifndef STRADDLE_CHECKERBOARD_H_INCLUDED
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
+unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int line_H_P[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*)) {
+    return callback(plaintext, plaintext_len, line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2, ciphertext_len);
+}
+
 unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int line_H_P[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
     // Assumes top line does not have / or .
 
