@@ -1,11 +1,11 @@
 #ifndef STRADDLE_CHECKERBOARD_H_INCLUDED
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
-unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int line_H_P[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*)) {
-    return callback(plaintext, plaintext_len, line_H_P, straddle_alphabet, straddle_space_1, straddle_space_2, ciphertext_len);
+unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int top_row_not_encoded[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*)) {
+    return callback(plaintext, plaintext_len, top_row_not_encoded, straddle_alphabet, straddle_space_1, straddle_space_2, ciphertext_len);
 }
 
-unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int line_H_P[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
+unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int top_row_not_encoded[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
     // Assumes top line does not have / or .
 
     // Straddling Checkerboard Top Line Creation Start
@@ -15,14 +15,14 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
     for (int i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
-        for (int j = 50; j < 60; j++) {
-            if (line_H_P[j] < num) {
+        for (int j = 0; j < 10; j++) {
+            if (top_row_not_encoded[j] < num) {
                 pos = j;
-                num = line_H_P[j];
+                num = top_row_not_encoded[j];
             }
         }
-        line_H_P[pos] += 10;
-        straddle_line[pos - 50] = i;
+        top_row_not_encoded[pos] += 10;
+        straddle_line[pos] = i;
     }
     // Straddling Checkerboard Top Line Creation End
 
