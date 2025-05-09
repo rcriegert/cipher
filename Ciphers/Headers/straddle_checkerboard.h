@@ -8,6 +8,7 @@ unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int pla
 unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int top_row_not_encoded[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
     // Assumes top line does not have / or .
 
+    // TODO - Don't do this here, import correct top line. Also means editing Vic.c
     // Straddling Checkerboard Top Line Creation Start
     int pos;
     int num;

@@ -22,4 +22,6 @@ unsigned char* unkeyed_columnar_transposition_uc(unsigned char plaintext[], int 
     return ciphertext;
 }
 
+
+
 #endif // COLUMNAR_TRANSPOSITIONS_H_INCLUDED
