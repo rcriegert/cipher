@@ -10,8 +10,7 @@
 #include "../Headers/straddle_checkerboard.h"
 
 // TODO - Make this accept passed arguments
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     // Starting Information
     // TODO - Can I move allocations/instantiations up?
     int personal_number = 8;
