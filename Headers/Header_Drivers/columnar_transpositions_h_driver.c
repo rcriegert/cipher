@@ -3,6 +3,8 @@
 
 int columnar_transpositions_h_tests() {
 
+    // TODO -- ACK I MESSED UP THE KEYED ONE REDO REDO REDO REDO REDO
+
     // Test 1 -- Simple Unkeyed Columnar Transposition
     {
         unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";

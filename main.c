@@ -75,6 +75,7 @@ int main()
 */
 
 int main() {
-    int value = columnar_transpositions_h_tests();
+    //int value = columnar_transpositions_h_tests();
+    vic();
     return 0;
 }

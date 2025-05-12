@@ -16,9 +16,6 @@ int vic() {
     int personal_number = 8;
     int date_number[] = {7, 4, 1, 7, 7, 6};
     unsigned char phrase[] = "IDREAMOFJEANNIEWITHT";
-    // TODO - Write code to break the phrase into two parts - do I? Can I just use the first?
-    unsigned char phrase_1[] = "IDREAMOFJE";
-    unsigned char phrase_2[] = "ANNIEWITHT";
     int keygroup_number[] = {7, 7, 6, 5, 1};
     int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
     unsigned char straddle_alphabet[] = "ATONESIRBCDFGHJKLMPQUVWXYZ./";
@@ -44,6 +41,7 @@ int vic() {
 
     // Line E Start
 
+    // TODO - Combine e_1 & e_2
     // Note - could make into 1 array, and maybe not separate phrase either?
     // Note - phrase messed up by +26 after this section
     // Note - phrase must be all one case, no spaces/special symbols
@@ -55,27 +53,27 @@ int vic() {
         pos = 0;
         num = 0x7A;
         for (int j = 0; j < 10; j++) {
-            if (phrase_1[j] < num) {
+            if (phrase[j] < num) {
                 pos = j;
-                num = phrase_1[j];
+                num = phrase[j];
             }
         }
-        phrase_1[pos] += 26;
+        phrase[pos] += 26;
         e_1[pos] = i%10;
     }
     int e_2[10];
     for (int i = 1; i < 11; i++) {
-        pos = 0;
+        pos = 10;
         num = 0x7A;
-        for (int j = 0; j < 10; j++) {
-            if (phrase_2[j] < num) {
+        for (int j = 10; j < 20; j++) {
+            if (phrase[j] < num) {
                 pos = j;
-                num = phrase_2[j];
+                num = phrase[j];
             }
         }
 
-        phrase_2[pos] += 26;
-        e_2[pos] = i%10;
+        phrase[pos] += 26;
+        e_2[pos-10] = i%10;
     }
 
     // Line E End
@@ -183,7 +181,7 @@ int vic() {
 
     // Lines Q-R Sequencing Start
 
-    for (int i = 1; i < pa1 + 1; i++) {
+    for (int i = 0; i < pa1; i++) {
         pos = 0;
         num = 11;
         for (int j = 0; j < pa1; j++) {
@@ -195,7 +193,7 @@ int vic() {
         line_Q_R[pos] += 10;
         line_Q_R_Sequenced[pos] = i;
     }
-    for (int i = pa1 + 1; i < pa1 + pa2 + 1; i++) {
+    for (int i = pa1; i < pa1 + pa2; i++) {
         pos = 0;
         num = 11;
         for (int j = pa1; j < pa1 + pa2; j++) {
@@ -214,21 +212,54 @@ int vic() {
 
     // Lines Q-R Sequencing End
 
+    for (int i = 0; i < pa1 + pa2; i++) {
+        printf("%d ", line_Q_R_Sequenced[i]);
+    }
+    printf("\n");
 
+
+    // Straddling Checkerboard Top Line Creation Start
+    int straddle_line[10];
+    for (int i = 0; i < 10; i++) {
+        pos = 0;
+        num = 10;
+        for (int j = 0; j < 10; j++) {
+            if (line_H_P[j+50] < num) {
+                pos = j;
+                num = line_H_P[j+50];
+            }
+        }
+        line_H_P[pos+50] += 10;
+        straddle_line[pos] = i;
+    }
+    // Straddling Checkerboard Top Line Creation End
+    // NOTE: Line H_P 50-59 is 10 more than it should be at this point
+
+    // TODO - Broken
 
     // Encode with Straddle Start
     int ciphertext_len;
-
-    unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), &(line_H_P[50]), straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
-
-    // Encode with Straddle End
+    unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
+    int* nums_after_straddle = (int*)malloc(ciphertext_len * sizeof(int));
     for (int i = 0; i < ciphertext_len; i++) {
-        printf("%d ", text_after_straddle[i]);
+        nums_after_straddle[i] = text_after_straddle[i];
     }
 
+    for (int i = 0; i < ciphertext_len; i++) {
+        printf("%d ", nums_after_straddle[i]);
+    }
+    printf("\n");
+
+    int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
+
+    for (int i = 0; i < pa1; i++) {
+        printf("%d ", after_columnar_transposition_1[i]);
+    }
 
     // Cleanup
 
+    free(after_columnar_transposition_1);
+    free(nums_after_straddle);
     free(text_after_straddle);
     free(line_Q_R_Sequenced);
     free(line_Q_R);

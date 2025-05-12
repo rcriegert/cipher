@@ -1,35 +1,16 @@
 #ifndef STRADDLE_CHECKERBOARD_H_INCLUDED
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
-unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int top_row_not_encoded[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*)) {
-    return callback(plaintext, plaintext_len, top_row_not_encoded, straddle_alphabet, straddle_space_1, straddle_space_2, ciphertext_len);
+unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*)) {
+    return callback(plaintext, plaintext_len, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, ciphertext_len);
 }
 
-unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int top_row_not_encoded[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
+unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len) {
     // Assumes top line does not have / or .
-
-    // TODO - Don't do this here, import correct top line. Also means editing Vic.c
-    // Straddling Checkerboard Top Line Creation Start
-    int pos;
-    int num;
-    int straddle_line[10];
-    for (int i = 0; i < 10; i++) {
-        pos = 0;
-        num = 10;
-        for (int j = 0; j < 10; j++) {
-            if (top_row_not_encoded[j] < num) {
-                pos = j;
-                num = top_row_not_encoded[j];
-            }
-        }
-        top_row_not_encoded[pos] += 10;
-        straddle_line[pos] = i;
-    }
-    // Straddling Checkerboard Top Line Creation End
 
     // Encode with Straddle Start
     unsigned char* ciphertext = malloc(plaintext_len * 2 * sizeof(unsigned char));
-    pos = 0;
+    int pos = 0;
     int ciphertext_size = plaintext_len * 2;
     int completed_loop;
     // Add number support

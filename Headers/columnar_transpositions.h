@@ -25,6 +25,7 @@ unsigned char* unkeyed_columnar_transposition_uc(unsigned char plaintext[], int 
 
 
 // Assumes key is already in order numbered: 0 -> len - 1
+// TODO - FIX! ! ! KEYING IS OTHER WAY AROUND
 unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int plaintext_len, int key[], int key_len) {
     // TODO - Check if key[] is set up correctly
     // TODO - safe malloc
@@ -37,6 +38,40 @@ unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int pl
             curr_key_index++;
             curr_row = 0;
         }
+        ciphertext[i] = plaintext[(curr_row * key_len) + key[curr_key_index]];
+        curr_row++;
+    }
+    return ciphertext;
+}
+
+// TODO - Add unkeyed int
+
+// Assumes key is already in order numbered: 0 -> len - 1
+int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* key, int key_len) {
+    // TODO - Check if key[] is set up correctly
+    // TODO - safe malloc
+
+    int curr_row = 0;
+    int curr_key_index = 0;
+    int curr_key_num = 0;
+    for (int i = 0; i < key_len; i++) {
+        if (key[i] == curr_key_num) {
+            curr_key_index = i;
+        }
+    }
+    int* ciphertext = (int*)malloc(plaintext_len * sizeof(int));
+    for (int i = 0; i < plaintext_len; i++) {
+        if ((curr_row * key_len) + key[curr_key_index] >= plaintext_len) {
+            curr_key_num++;
+            for (int j = 0; j < key_len; j++) {
+                if (key[j] == curr_key_num) {
+                    curr_key_index = j;
+                }
+            }
+            curr_row = 0;
+            printf("\n");
+        }
+        printf("%d ", plaintext[(curr_row * key_len) + key[curr_key_index]]);
         ciphertext[i] = plaintext[(curr_row * key_len) + key[curr_key_index]];
         curr_row++;
     }
