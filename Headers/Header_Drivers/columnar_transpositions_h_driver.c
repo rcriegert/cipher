@@ -1,0 +1,44 @@
+#include "../columnar_transpositions.h"
+#include <string.h>
+
+int main(int argc, char** argv) {
+
+    // Test 1 -- Simple Unkeyed Columnar Transposition
+    {
+        unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
+        int plaintext_len = 26;
+        int column_count = 5;
+        unsigned char* ciphertext = unkeyed_columnar_transposition_uc(plaintext, plaintext_len, column_count);
+        unsigned char correct_output[] = "afkpuzbglqvchmrwdinsxejoty";
+
+        int test_1 = strncmp(ciphertext, correct_output, plaintext_len);
+        if (test_1 == 0) {
+            printf("Succeeded - Test 1: Simple Unkeyed Columnar Transposition\n");
+        }
+        else {
+            printf("Failed - Test 1: Simple Unkeyed Columnar Transposition\n");
+        }
+        free(ciphertext);
+    }
+
+    // Test 2 -- Trivial Keyed Columnar Transposition
+    {
+        unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
+        int plaintext_len = 26;
+        int key[] = {0, 1, 2, 3, 4};
+        int key_len = 5;
+        unsigned char* ciphertext = keyed_columnar_transposition_uc(plaintext, plaintext_len, key, key_len);
+        unsigned char correct_output[] = "afkpuzbglqvchmrwdinsxejoty";
+
+        int test_2 = strncmp(ciphertext, correct_output, plaintext_len);
+        if (test_2 == 0) {
+            printf("Succeeded - Test 2: Trivial Keyed Columnar Transposition\n");
+        }
+        else {
+            printf("Failed - Test 2: Trivial Keyed Columnar Transposition\n");
+        }
+        free(ciphertext);
+    }
+
+    return 0;
+}
