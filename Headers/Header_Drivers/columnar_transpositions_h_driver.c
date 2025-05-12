@@ -40,5 +40,7 @@ int main(int argc, char** argv) {
         free(ciphertext);
     }
 
+    // TODO - more tests
+
     return 0;
 }

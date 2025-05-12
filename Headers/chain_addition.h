@@ -1,6 +1,7 @@
 #ifndef CHAIN_ADDITION_H_INCLUDED
 #define CHAIN_ADDITION_H_INCLUDED
 
+// TODO - rename array :bruh:
 void chain_addition(int array[], int start_chain, int total_len, int base) {
     int num_1 = 0;
     int num_2 = 1;
