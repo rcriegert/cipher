@@ -1,7 +1,7 @@
 #include "../columnar_transpositions.h"
 #include <string.h>
 
-int main(int argc, char** argv) {
+int columnar_transpositions_h_tests() {
 
     // Test 1 -- Simple Unkeyed Columnar Transposition
     {
@@ -40,7 +40,26 @@ int main(int argc, char** argv) {
         free(ciphertext);
     }
 
-    // TODO - more tests
+    // Test 3 -- Keyed Columnar Transposition
+    {
+        unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
+        int plaintext_len = 26;
+        int key[] = {2, 0, 4, 1, 3};
+        int key_len = 5;
+        unsigned char* ciphertext = keyed_columnar_transposition_uc(plaintext, plaintext_len, key, key_len);
+        unsigned char correct_output[] = "chmrwafkpuzejotybglqvdinsx";
+
+        int test_3 = strncmp(ciphertext, correct_output, plaintext_len);
+        if (test_3 == 0) {
+            printf("Succeeded - Test 3: Keyed Columnar Transposition\n");
+        }
+        else {
+            printf("Failed - Test 3: Keyed Columnar Transposition\n");
+        }
+        free(ciphertext);
+    }
+
+    // TODO - more tests (which?)
 
     return 0;
 }

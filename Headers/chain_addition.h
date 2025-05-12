@@ -1,12 +1,11 @@
 #ifndef CHAIN_ADDITION_H_INCLUDED
 #define CHAIN_ADDITION_H_INCLUDED
 
-// TODO - rename array :bruh:
-void chain_addition(int array[], int start_chain, int total_len, int base) {
+void chain_addition(int chain[], int start_chain, int total_len, int base) {
     int num_1 = 0;
     int num_2 = 1;
     for (int i = start_chain; i < total_len; i++) {
-        array[i] = (array[num_1] + array[num_2]) % base;
+        chain[i] = (chain[num_1] + chain[num_2]) % base;
         num_1++;
         num_2++;
     }

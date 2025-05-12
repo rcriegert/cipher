@@ -1,6 +1,9 @@
 // warning:  This is c++ code... convert it to c
 // use:      https://www.geeksforgeeks.org/callbacks-in-c/
-#include <map>
+// note:     "borrowed" from https://stackoverflow.com/questions/6807376/call-back-routine
+// note:     final project will use array of callbacks, but for now I just want to debug stuff :sob:
+
+/*#include <map>
 #include <iostream>
 
 typedef void (*Callback)();
@@ -68,4 +71,10 @@ int main()
 
 	EventProcessor();
 	return 0;
+}
+*/
+
+int main() {
+    int value = columnar_transpositions_h_tests();
+    return 0;
 }
