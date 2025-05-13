@@ -46,6 +46,8 @@ unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int pl
 
 // TODO - Add unkeyed int
 
+
+// TODO - Fix it, it is Broken
 // Assumes key is already in order numbered: 0 -> len - 1
 int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* key, int key_len) {
     // TODO - Check if key[] is set up correctly
@@ -59,9 +61,10 @@ int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* ke
             curr_key_index = i;
         }
     }
+
     int* ciphertext = (int*)malloc(plaintext_len * sizeof(int));
     for (int i = 0; i < plaintext_len; i++) {
-        if ((curr_row * key_len) + key[curr_key_index] >= plaintext_len) {
+        if ((curr_row * key_len) + curr_key_index >= plaintext_len) {
             curr_key_num++;
             for (int j = 0; j < key_len; j++) {
                 if (key[j] == curr_key_num) {
@@ -69,10 +72,8 @@ int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* ke
                 }
             }
             curr_row = 0;
-            printf("\n");
         }
-        printf("%d ", plaintext[(curr_row * key_len) + key[curr_key_index]]);
-        ciphertext[i] = plaintext[(curr_row * key_len) + key[curr_key_index]];
+        ciphertext[i] = plaintext[(curr_row * key_len) + curr_key_index];
         curr_row++;
     }
     return ciphertext;

@@ -8,6 +8,7 @@
 
 #include "../Headers/chain_addition.h"
 #include "../Headers/straddle_checkerboard.h"
+#include "../Headers/columnar_transpositions.h"
 
 // TODO - Make this accept passed arguments
 int vic() {
@@ -212,10 +213,6 @@ int vic() {
 
     // Lines Q-R Sequencing End
 
-    for (int i = 0; i < pa1 + pa2; i++) {
-        printf("%d ", line_Q_R_Sequenced[i]);
-    }
-    printf("\n");
 
 
     // Straddling Checkerboard Top Line Creation Start
@@ -235,24 +232,25 @@ int vic() {
     // Straddling Checkerboard Top Line Creation End
     // NOTE: Line H_P 50-59 is 10 more than it should be at this point
 
-    // TODO - Broken
-
     // Encode with Straddle Start
     int ciphertext_len;
     unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
-    int* nums_after_straddle = (int*)malloc(ciphertext_len * sizeof(int));
+
+
+    int padding = 5 - (ciphertext_len % 5);
+    int* nums_after_straddle = (int*)malloc((ciphertext_len + padding) * sizeof(int));
     for (int i = 0; i < ciphertext_len; i++) {
         nums_after_straddle[i] = text_after_straddle[i];
     }
-
-    for (int i = 0; i < ciphertext_len; i++) {
-        printf("%d ", nums_after_straddle[i]);
+    // pad to ciphertext_len % 5 == 0
+    for (int i = ciphertext_len; i < ciphertext_len + padding; i++) {
+        nums_after_straddle[i] = 9;
     }
-    printf("\n");
+    ciphertext_len += padding;
 
     int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
 
-    for (int i = 0; i < pa1; i++) {
+    for (int i = 0; i < ciphertext_len; i++) {
         printf("%d ", after_columnar_transposition_1[i]);
     }
 

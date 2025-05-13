@@ -33,7 +33,7 @@ unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_le
                 if (j >= straddle_space_1) {
                     addition++;
                 }
-                if (j >= straddle_space_2) {
+                if (j >= straddle_space_2 - 1) {
                     addition++;
                 }
                 ciphertext[pos] = straddle_line[j + addition];
