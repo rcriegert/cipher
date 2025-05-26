@@ -25,7 +25,6 @@ unsigned char* unkeyed_columnar_transposition_uc(unsigned char plaintext[], int 
 
 
 // Assumes key is already in order numbered: 0 -> len - 1
-// TODO - FIX! ! ! KEYING IS OTHER WAY AROUND
 unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int plaintext_len, int key[], int key_len) {
     // TODO - Check if key[] is set up correctly
     // TODO - safe malloc
@@ -47,7 +46,6 @@ unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int pl
 // TODO - Add unkeyed int
 
 
-// TODO - Fix it, it is Broken
 // Assumes key is already in order numbered: 0 -> len - 1
 int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* key, int key_len) {
     // TODO - Check if key[] is set up correctly

@@ -3,6 +3,8 @@
 // note:     "borrowed" from https://stackoverflow.com/questions/6807376/call-back-routine
 // note:     final project will use array of callbacks, but for now I just want to debug stuff :sob:
 
+int MAX_CIPHER_PARAMETERS = 10;
+
 /*#include <map>
 #include <iostream>
 
@@ -74,8 +76,17 @@ int main()
 }
 */
 
+struct Cipher {
+    void* function_ptr;
+    unsigned char* plaintext;
+    unsigned char* ciphertext;
+    //void* parameters[MAX_CIPHER_PARAMETERS];
+};
+
 int main() {
     //int value = columnar_transpositions_h_tests();
+    //struct Cipher simple_vic;
+    //vic.function_ptr = &
     vic();
     return 0;
 }

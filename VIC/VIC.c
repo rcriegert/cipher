@@ -236,26 +236,48 @@ int vic() {
     int ciphertext_len;
     unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
 
-
+    // Re-copy to fixed size
     int padding = 5 - (ciphertext_len % 5);
     int* nums_after_straddle = (int*)malloc((ciphertext_len + padding) * sizeof(int));
     for (int i = 0; i < ciphertext_len; i++) {
         nums_after_straddle[i] = text_after_straddle[i];
     }
-    // pad to ciphertext_len % 5 == 0
+
+    // Pad to ciphertext_len % 5 == 0
+    // TODO - make nums_after_straddle additions random(can I do that?)
     for (int i = ciphertext_len; i < ciphertext_len + padding; i++) {
         nums_after_straddle[i] = 9;
     }
     ciphertext_len += padding;
 
+    // Columnar Transposition 1 (Keyed)
     int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
 
-    for (int i = 0; i < ciphertext_len; i++) {
-        printf("%d ", after_columnar_transposition_1[i]);
+    // Columnar Transposition 2 (Keyed 2-Triangular)
+    int* end_ciphertext = (int*)malloc(ciphertext_len * sizeof(int));
+    int t2_first = 10;
+    int t2_second = 10;
+    int t2_first_index = 0;
+    int t2_second_index = 0;
+    for (int i = pa1; i < pa1 + pa2; i++) {
+        if (line_Q_R_Sequenced[i] < t2_second) {
+            if (line_Q_R_Sequenced[i] < t2_first) {
+                t2_second = t2_first;
+                t2_second_index = t2_first_index;
+                t2_first = line_Q_R_Sequenced[i];
+                t2_first_index = i - pa1;
+            }
+            else {
+                t2_second = line_Q_R_Sequenced[i];
+                t2_second_index = i - pa1;
+            }
+        }
     }
+    printf("%d %d", t2_first_index, t2_second_index);
 
     // Cleanup
 
+    free(end_ciphertext);
     free(after_columnar_transposition_1);
     free(nums_after_straddle);
     free(text_after_straddle);
