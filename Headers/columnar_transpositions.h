@@ -77,4 +77,30 @@ int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* ke
     return ciphertext;
 }
 
+// Write something here, and what is the actual name of this??
+int* offset_columns_int(int* plaintext, int plaintext_len, int* offset, int offset_len, int column_count) {
+    // TODO - Check if offset[] is set up correctly
+    // TODO - safe malloc
+
+    // adjustment
+    int* ciphertext = (int*)calloc(plaintext_len, sizeof(int));
+    int curr = 0;
+    for (int i = 0; i < offset_len; i++) {
+        for (int j = 0; j < offset[i]; j++) {
+            ciphertext[(i*column_count) + j] = plaintext[curr];
+            curr++;
+        }
+    }
+    for (int i = 0; i < offset_len; i++) {
+        for (int j = offset[i]; j < column_count; j++) {
+            if (curr < plaintext_len) {
+                ciphertext[(i*column_count) + j] = plaintext[curr];
+                curr++;
+            }
+        }
+    }
+
+    return ciphertext;
+}
+
 #endif // COLUMNAR_TRANSPOSITIONS_H_INCLUDED

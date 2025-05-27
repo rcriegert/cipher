@@ -9,6 +9,7 @@
 #include "../Headers/chain_addition.h"
 #include "../Headers/straddle_checkerboard.h"
 #include "../Headers/columnar_transpositions.h"
+#include "../Headers/sequencing.h"
 
 // TODO - Make this accept passed arguments
 int vic() {
@@ -254,7 +255,6 @@ int vic() {
     int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
 
     // Columnar Transposition 2 (Keyed 2-Triangular)
-    int* end_ciphertext = (int*)malloc(ciphertext_len * sizeof(int));
     int t2_first = 10;
     int t2_second = 10;
     int t2_first_index = 0;
@@ -273,11 +273,56 @@ int vic() {
             }
         }
     }
-    printf("%d %d", t2_first_index, t2_second_index);
+    int t2_rows = ((int)(ciphertext_len / pa2)) + 1;
+    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
+
+    pos = 0;
+    transpose_table[0] = t2_first_index;
+    num = t2_first_index;
+    for (int i = 1; i < t2_rows; i++) {
+        num++;
+        if (num > pa2) {
+            if (pos == 0) {
+                num = t2_second_index;
+            }
+            else {
+                num = pa2;
+            }
+        }
+        transpose_table[i] = num;
+    }
+
+    int* t2_after_offset = offset_columns_int(after_columnar_transposition_1, ciphertext_len, transpose_table, t2_rows, pa2);
+    int* ciphertext = keyed_columnar_transposition_int(t2_after_offset, ciphertext_len, &(line_Q_R_Sequenced[pa1]), pa2);
+
+    // Add indicator to ciphertext
+    int group_count = (ciphertext_len/5) + 1;
+    int indicator_group = group_count - date_number[5];
+    int* final_text = (int*)malloc((group_count * 5) * sizeof(int));
+    for (int i = 0; i < indicator_group * 5; i++) {
+        final_text[i] = ciphertext[i];
+    }
+    for (int i = 0; i < 5; i++) {
+        final_text[(indicator_group * 5) + i] = keygroup_number[i];
+    }
+    for (int i = indicator_group * 5; i < ciphertext_len; i++) {
+        final_text[i + 5] = ciphertext[i];
+    }
+
+    ciphertext_len += 5;
+    // Check
+    for (int i = 0; i < ciphertext_len; i++) {
+        printf("%d ", final_text[i]);
+        if (i%5 == 4 && i != 0) {
+            printf("\n");
+        }
+    }
 
     // Cleanup
-
-    free(end_ciphertext);
+    free(final_text);
+    free(ciphertext);
+    free(t2_after_offset);
+    free(transpose_table);
     free(after_columnar_transposition_1);
     free(nums_after_straddle);
     free(text_after_straddle);
