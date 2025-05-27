@@ -1,36 +1,40 @@
-// VIC Cipher
-// Notation from https://en.wikipedia.org/wiki/VIC_cipher
-// Additional information from http://www.quadibloc.com/crypto/pp1324.htm
+/* VIC Cipher */
+/* Notation from https://en.wikipedia.org/wiki/VIC_cipher */
+/* Additional information from http://www.quadibloc.com/crypto/pp1324.htm */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "../Headers/chain_addition.h"
-#include "../Headers/straddle_checkerboard.h"
-#include "../Headers/columnar_transpositions.h"
-#include "../Headers/sequencing.h"
+#include "../Headers/H_FILES/chain_addition.h"
+#include "../Headers/H_FILES/straddle_checkerboard.h"
+#include "../Headers/H_FILES/columnar_transpositions.h"
+#include "../Headers/H_FILES/sequencing.h"
+#include "VIC.h"
 
-// TODO - Make this accept passed arguments
-int vic() {
-    // Starting Information
-    // TODO - Can I move allocations/instantiations up?
+/* TODO - Make this accept passed arguments */
+int* vic() {
+    /* Starting Information */
+    /* TODO - Can I move allocations/instantiations up? */
     int personal_number = 8;
     int date_number[] = {7, 4, 1, 7, 7, 6};
     unsigned char phrase[] = "IDREAMOFJEANNIEWITHT";
     int keygroup_number[] = {7, 7, 6, 5, 1};
     int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
     unsigned char straddle_alphabet[] = "ATONESIRBCDFGHJKLMPQUVWXYZ./";
-    // TODO - Derive these from straddle_alphabet (how?)
-    // Note - Indexed at 0
-    // Note - ss1 < ss2
+    /* TODO - Derive these from straddle_alphabet (how?) */
+    /* Note - Indexed at 0 */
+    /* Note - ss1 < ss2 */
     int straddle_space_1 = 2;
     int straddle_space_2 = 6;
     unsigned char* plaintext = "WEAREPLEASEDTOHEAROFYOURSUCCESSINESTABLISHINGYOURFALSEIDENTITYYOUWILLBESENTSOMEMONEYTOCOVEREXPENSESWITHINAMONTH";
 
-    // Line F Start
+    int i;
+    int j;
 
-    for (int i = 0; i < 5; i++) {
+    /* Line F Start */
+
+    for (i = 0; i < 5; i++) {
         if (keygroup_number[i] < date_number[i]) {
             line_F[i] += 10;
         }
@@ -39,22 +43,22 @@ int vic() {
     }
     chain_addition(line_F, 5, 10, 10);
 
-    // Line F End
+    /* Line F End */
 
-    // Line E Start
+    /* Line E Start */
 
-    // TODO - Combine e_1 & e_2
-    // Note - could make into 1 array, and maybe not separate phrase either?
-    // Note - phrase messed up by +26 after this section
-    // Note - phrase must be all one case, no spaces/special symbols
+    /* TODO - Combine e_1 & e_2 */
+    /* Note - could make into 1 array, and maybe not separate phrase either? */
+    /* Note - phrase messed up by +26 after this section */
+    /* Note - phrase must be all one case, no spaces/special symbols */
 
     int pos;
     int num;
     int e_1[10];
-    for (int i = 1; i < 11; i++) {
+    for (i = 1; i < 11; i++) {
         pos = 0;
         num = 0x7A;
-        for (int j = 0; j < 10; j++) {
+        for (j = 0; j < 10; j++) {
             if (phrase[j] < num) {
                 pos = j;
                 num = phrase[j];
@@ -64,10 +68,10 @@ int vic() {
         e_1[pos] = i%10;
     }
     int e_2[10];
-    for (int i = 1; i < 11; i++) {
+    for (i = 1; i < 11; i++) {
         pos = 10;
         num = 0x7A;
-        for (int j = 10; j < 20; j++) {
+        for (j = 10; j < 20; j++) {
             if (phrase[j] < num) {
                 pos = j;
                 num = phrase[j];
@@ -78,21 +82,21 @@ int vic() {
         e_2[pos-10] = i%10;
     }
 
-    // Line E End
+    /* Line E End */
 
-    // Line G Start
+    /* Line G Start */
 
     int line_G[10];
-    for (int i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         line_G[i] = (e_1[i] + line_F[i]) % 10;
     }
 
-    // Line G End
+    /* Line G End */
 
-    // Lines H-P start
+    /* Lines H-P start */
 
     int line_H_P[60];
-    for (int i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         int j = line_G[i] - 1;
         if (j == -1) {
             j = 9;
@@ -102,15 +106,15 @@ int vic() {
 
     chain_addition(line_H_P, 10, 60, 10);
 
-    // Lines H-P End
+    /* Lines H-P End */
 
-    // Line J Start
+    /* Line J Start */
 
     int line_J[10];
-    for (int i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
-        for (int j = 0; j < 10; j++) {
+        for (j = 0; j < 10; j++) {
             if (line_H_P[j] < num) {
                 pos = j;
                 num = line_H_P[j];
@@ -122,15 +126,15 @@ int vic() {
             line_J[pos] = 10;
         }
     }
-    // To revert changes in H_P (all + 10)
-    for (int i = 0; i < 10; i++) {
+    /* To revert changes in H_P (all + 10) */
+    for (i = 0; i < 10; i++) {
         line_H_P[i] -= 10;
     }
 
-    // Line J End
+    /* Line J End */
 
-    // Permutation Keys Start
-    // TODO - refactor variable names to pk1/2, maybe?
+    /* Permutation Keys Start */
+    /* TODO - refactor variable names to pk1/2, maybe? */
 
     int pa1;
     int pa2 = line_H_P[59];
@@ -146,23 +150,23 @@ int vic() {
     pa1 += personal_number;
     pa2 += personal_number;
 
-    // Permutation Keys End
+    /* Permutation Keys End */
 
-    // Allocations for Q, R
+    /* Allocations for Q, R */
     int* line_Q_R = malloc(sizeof(int) * (pa1 + pa2));
     int* line_Q_R_Sequenced = malloc(sizeof(int) * (pa1 + pa2));
 
-    // Lines Q-R Start
+    /* Lines Q-R Start */
 
     int column_index;
     int column_number = 1;
-    for (int i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         if (line_J[i] == column_number) {
             column_index = i;
         }
     }
     int row_index = 0;
-    for (int i = 0; i < pa1 + pa2; i++) {
+    for (i = 0; i < pa1 + pa2; i++) {
         line_Q_R[i] = line_H_P[10 + ((10 * row_index) + column_index)];
         if (line_Q_R[i] == 0) {
             line_Q_R[i] = 10;
@@ -171,7 +175,7 @@ int vic() {
         if (row_index == 5) {
             row_index = 0;
             column_number++;
-            for (int j = 0; j < 10; j++) {
+            for (j = 0; j < 10; j++) {
                 if (line_J[j] == column_number) {
                     column_index = j;
                 }
@@ -179,14 +183,14 @@ int vic() {
         }
     }
 
-    // Lines Q-R End
+    /* Lines Q-R End */
 
-    // Lines Q-R Sequencing Start
+    /* Lines Q-R Sequencing Start */
 
-    for (int i = 0; i < pa1; i++) {
+    for (i = 0; i < pa1; i++) {
         pos = 0;
         num = 11;
-        for (int j = 0; j < pa1; j++) {
+        for (j = 0; j < pa1; j++) {
             if (line_Q_R[j] < num) {
                 pos = j;
                 num = line_Q_R[j];
@@ -195,10 +199,10 @@ int vic() {
         line_Q_R[pos] += 10;
         line_Q_R_Sequenced[pos] = i;
     }
-    for (int i = pa1; i < pa1 + pa2; i++) {
+    for (i = pa1; i < pa1 + pa2; i++) {
         pos = 0;
         num = 11;
-        for (int j = pa1; j < pa1 + pa2; j++) {
+        for (j = pa1; j < pa1 + pa2; j++) {
             if (line_Q_R[j] < num) {
                 pos = j;
                 num = line_Q_R[j];
@@ -207,21 +211,21 @@ int vic() {
         line_Q_R[pos] += 10;
         line_Q_R_Sequenced[pos] = i - pa1;
     }
-    // To revert changes in Q_R (all + 10)
-    for (int i = 0; i < pa1 + pa2; i++) {
+    /* To revert changes in Q_R (all + 10) */
+    for (i = 0; i < pa1 + pa2; i++) {
         line_Q_R[i] -= 10;
     }
 
-    // Lines Q-R Sequencing End
+    /* Lines Q-R Sequencing End */
 
 
 
-    // Straddling Checkerboard Top Line Creation Start
+    /* Straddling Checkerboard Top Line Creation Start */
     int straddle_line[10];
-    for (int i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
-        for (int j = 0; j < 10; j++) {
+        for (j = 0; j < 10; j++) {
             if (line_H_P[j+50] < num) {
                 pos = j;
                 num = line_H_P[j+50];
@@ -230,36 +234,36 @@ int vic() {
         line_H_P[pos+50] += 10;
         straddle_line[pos] = i;
     }
-    // Straddling Checkerboard Top Line Creation End
-    // NOTE: Line H_P 50-59 is 10 more than it should be at this point
+    /* Straddling Checkerboard Top Line Creation End */
+    /* NOTE: Line H_P 50-59 is 10 more than it should be at this point */
 
-    // Encode with Straddle Start
+    /* Encode with Straddle Start */
     int ciphertext_len;
     unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
 
-    // Re-copy to fixed size
+    /* Re-copy to fixed size */
     int padding = 5 - (ciphertext_len % 5);
     int* nums_after_straddle = (int*)malloc((ciphertext_len + padding) * sizeof(int));
-    for (int i = 0; i < ciphertext_len; i++) {
+    for (i = 0; i < ciphertext_len; i++) {
         nums_after_straddle[i] = text_after_straddle[i];
     }
 
-    // Pad to ciphertext_len % 5 == 0
-    // TODO - make nums_after_straddle additions random(can I do that?)
-    for (int i = ciphertext_len; i < ciphertext_len + padding; i++) {
+    /* Pad to ciphertext_len % 5 == 0 */
+    /* TODO - make nums_after_straddle additions random(can I do that?) */
+    for (i = ciphertext_len; i < ciphertext_len + padding; i++) {
         nums_after_straddle[i] = 9;
     }
     ciphertext_len += padding;
 
-    // Columnar Transposition 1 (Keyed)
+    /* Columnar Transposition 1 (Keyed) */
     int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
 
-    // Columnar Transposition 2 (Keyed 2-Triangular)
+    /* Columnar Transposition 2 (Keyed 2-Triangular) */
     int t2_first = 10;
     int t2_second = 10;
     int t2_first_index = 0;
     int t2_second_index = 0;
-    for (int i = pa1; i < pa1 + pa2; i++) {
+    for (i = pa1; i < pa1 + pa2; i++) {
         if (line_Q_R_Sequenced[i] < t2_second) {
             if (line_Q_R_Sequenced[i] < t2_first) {
                 t2_second = t2_first;
@@ -279,7 +283,7 @@ int vic() {
     pos = 0;
     transpose_table[0] = t2_first_index;
     num = t2_first_index;
-    for (int i = 1; i < t2_rows; i++) {
+    for (i = 1; i < t2_rows; i++) {
         num++;
         if (num > pa2) {
             if (pos == 0) {
@@ -295,31 +299,21 @@ int vic() {
     int* t2_after_offset = offset_columns_int(after_columnar_transposition_1, ciphertext_len, transpose_table, t2_rows, pa2);
     int* ciphertext = keyed_columnar_transposition_int(t2_after_offset, ciphertext_len, &(line_Q_R_Sequenced[pa1]), pa2);
 
-    // Add indicator to ciphertext
+    /* Add indicator to ciphertext */
     int group_count = (ciphertext_len/5) + 1;
     int indicator_group = group_count - date_number[5];
     int* final_text = (int*)malloc((group_count * 5) * sizeof(int));
-    for (int i = 0; i < indicator_group * 5; i++) {
+    for (i = 0; i < indicator_group * 5; i++) {
         final_text[i] = ciphertext[i];
     }
-    for (int i = 0; i < 5; i++) {
+    for (i = 0; i < 5; i++) {
         final_text[(indicator_group * 5) + i] = keygroup_number[i];
     }
-    for (int i = indicator_group * 5; i < ciphertext_len; i++) {
+    for (i = indicator_group * 5; i < ciphertext_len; i++) {
         final_text[i + 5] = ciphertext[i];
     }
 
-    ciphertext_len += 5;
-    // Check
-    for (int i = 0; i < ciphertext_len; i++) {
-        printf("%d ", final_text[i]);
-        if (i%5 == 4 && i != 0) {
-            printf("\n");
-        }
-    }
-
-    // Cleanup
-    free(final_text);
+    /* Cleanup */
     free(ciphertext);
     free(t2_after_offset);
     free(transpose_table);
@@ -329,5 +323,5 @@ int vic() {
     free(line_Q_R_Sequenced);
     free(line_Q_R);
 
-    return 0;
+    return final_text;
 }

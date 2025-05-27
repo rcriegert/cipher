@@ -1,11 +1,8 @@
-//#include "../columnar_transpositions.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "columnar_transpositions_driver.h"
 
-int columnar_transpositions_h_tests() {
+int columnar_transpositions_tests() {
 
-    // Test 1 -- Simple Unkeyed Columnar Transposition
+    /* Test 1 -- Simple Unkeyed Columnar Transposition */
     {
         unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
         int plaintext_len = 26;
@@ -23,7 +20,7 @@ int columnar_transpositions_h_tests() {
         free(ciphertext);
     }
 
-    // Test 2 -- Trivial Keyed Columnar Transposition
+    /* Test 2 -- Trivial Keyed Columnar Transposition */
     {
         unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
         int plaintext_len = 26;
@@ -42,7 +39,7 @@ int columnar_transpositions_h_tests() {
         free(ciphertext);
     }
 
-    // Test 3 -- Keyed Columnar Transposition
+    /* Test 3 -- Keyed Columnar Transposition */
     {
         unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
         int plaintext_len = 26;
@@ -61,7 +58,7 @@ int columnar_transpositions_h_tests() {
         free(ciphertext);
     }
 
-    // TODO - more tests (which?)
+    /* TODO - more tests (which?) */
 
     return 0;
 }

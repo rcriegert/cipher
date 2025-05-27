@@ -1,9 +1,10 @@
-// warning:  This is c++ code... convert it to c
-// use:      https://www.geeksforgeeks.org/callbacks-in-c/
-// note:     "borrowed" from https://stackoverflow.com/questions/6807376/call-back-routine
-// note:     final project will use array of callbacks, but for now I just want to debug stuff :sob:
+/* warning:  This is c++ code... convert it to c */
+/* use:      https://www.geeksforgeeks.org/callbacks-in-c/ */
+/* note:     "borrowed" from https://stackoverflow.com/questions/6807376/call-back-routine */
+/* note:     final project will use array of callbacks, but for now I just want to debug stuff :sob: */
 
-int MAX_CIPHER_PARAMETERS = 10;
+#define MAX_CIPHER_PARAMETERS 6
+#include "VIC/VIC.h"
 
 /*#include <map>
 #include <iostream>
@@ -80,13 +81,16 @@ struct Cipher {
     void* function_ptr;
     unsigned char* plaintext;
     unsigned char* ciphertext;
-    //void* parameters[MAX_CIPHER_PARAMETERS];
+    void* parameters[MAX_CIPHER_PARAMETERS];
 };
 
 int main() {
-    //int value = columnar_transpositions_h_tests();
-    //struct Cipher simple_vic;
-    //vic.function_ptr = &
-    vic();
+    /* int value = columnar_transpositions_h_tests(); */
+    /* struct Cipher simple_vic; */
+    /* vic.function_ptr = & */
+    int* vic_end = vic();
+
+    /* Cleanup */
+    free(vic_end);
     return 0;
 }
