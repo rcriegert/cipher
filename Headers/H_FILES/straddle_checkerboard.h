@@ -1,10 +1,12 @@
 #ifndef STRADDLE_CHECKERBOARD_H_INCLUDED
 #define STRADDLE_CHECKERBOARD_H_INCLUDED
 
-/* TODO - write something here */
-unsigned char* straddle_checkerboard_callback(unsigned char plaintext[], int plaintext_len, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len, unsigned char* (*callback)(unsigned char[], int, int[], unsigned char[], int, int, int*));
+#include <stdlib.h>
 
 /* TODO - write something here */
-unsigned char* straddle_checkerboard(unsigned char plaintext[], int plaintext_len, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2, int* ciphertext_len);
+void straddle_char_encode(unsigned char character, unsigned char ciphertext[], int* len_ptr, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2);
+
+/* TODO - write something here */
+unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int straddle_line[], unsigned char straddle_alphabet[], int* len_ptr);
 
 #endif /* STRADDLE_CHECKERBOARD_H_INCLUDED */

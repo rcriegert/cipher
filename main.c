@@ -3,8 +3,11 @@
 /* note:     "borrowed" from https://stackoverflow.com/questions/6807376/call-back-routine */
 /* note:     final project will use array of callbacks, but for now I just want to debug stuff :sob: */
 
-#define MAX_CIPHER_PARAMETERS 6
+#include <stdlib.h>
+
 #include "VIC/VIC.h"
+
+#define MAX_CIPHER_PARAMETERS 6
 
 /*#include <map>
 #include <iostream>
@@ -88,7 +91,26 @@ int main() {
     /* int value = columnar_transpositions_h_tests(); */
     /* struct Cipher simple_vic; */
     /* vic.function_ptr = & */
-    int* vic_end = vic();
+
+    int personal_number = 8;
+    int date_number[] = {7, 4, 1, 7, 7, 6};
+    unsigned char phrase[] = "IDREAMOFJEANNIEWITHT";
+    int keygroup_number[] = {7, 7, 6, 5, 1};
+    unsigned char straddle_alphabet[] = "AT ONE SIRBCDFGHJKLMPQUVWXYZ./";
+    unsigned char plaintext[] = "WEAREPLEASEDTOHEAROFYOURSUCCESSINESTABLISHINGYOURFALSEIDENTITYYOUWILLBESENTSOMEMONEYTOCOVEREXPENSESWITHINAMONTH";
+    int ciphertext_len = strlen(plaintext);
+
+    int* vic_end = vic_encrypt(plaintext, personal_number, date_number, phrase, keygroup_number, straddle_alphabet, &ciphertext_len);
+
+    int i;
+    for (i = 0; i < ciphertext_len; i++) {
+        printf("%d ", vic_end[i]);
+        if (i%5 == 4) {
+            printf("\n");
+        }
+    }
+
+
 
     /* Cleanup */
     free(vic_end);

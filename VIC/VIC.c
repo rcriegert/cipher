@@ -13,21 +13,10 @@
 #include "VIC.h"
 
 /* TODO - Make this accept passed arguments */
-int* vic() {
+int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], unsigned char straddle_alphabet[], int* len_ptr) {
     /* Starting Information */
     /* TODO - Can I move allocations/instantiations up? */
-    int personal_number = 8;
-    int date_number[] = {7, 4, 1, 7, 7, 6};
-    unsigned char phrase[] = "IDREAMOFJEANNIEWITHT";
-    int keygroup_number[] = {7, 7, 6, 5, 1};
     int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-    unsigned char straddle_alphabet[] = "ATONESIRBCDFGHJKLMPQUVWXYZ./";
-    /* TODO - Derive these from straddle_alphabet (how?) */
-    /* Note - Indexed at 0 */
-    /* Note - ss1 < ss2 */
-    int straddle_space_1 = 2;
-    int straddle_space_2 = 6;
-    unsigned char* plaintext = "WEAREPLEASEDTOHEAROFYOURSUCCESSINESTABLISHINGYOURFALSEIDENTITYYOUWILLBESENTSOMEMONEYTOCOVEREXPENSESWITHINAMONTH";
 
     int i;
     int j;
@@ -238,25 +227,24 @@ int* vic() {
     /* NOTE: Line H_P 50-59 is 10 more than it should be at this point */
 
     /* Encode with Straddle Start */
-    int ciphertext_len;
-    unsigned char* text_after_straddle = straddle_checkerboard_callback(plaintext, strlen(plaintext), straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2, &ciphertext_len, straddle_checkerboard);
+    unsigned char* text_after_straddle = straddle_checkerboard_encode(plaintext, straddle_line, straddle_alphabet, len_ptr);
 
     /* Re-copy to fixed size */
-    int padding = 5 - (ciphertext_len % 5);
-    int* nums_after_straddle = (int*)malloc((ciphertext_len + padding) * sizeof(int));
-    for (i = 0; i < ciphertext_len; i++) {
+    int padding = 5 - (*len_ptr % 5);
+    int* nums_after_straddle = (int*)malloc((*len_ptr + padding) * sizeof(int));
+    for (i = 0; i < *len_ptr; i++) {
         nums_after_straddle[i] = text_after_straddle[i];
     }
 
-    /* Pad to ciphertext_len % 5 == 0 */
+    /* Pad to *len_ptr % 5 == 0 */
     /* TODO - make nums_after_straddle additions random(can I do that?) */
-    for (i = ciphertext_len; i < ciphertext_len + padding; i++) {
+    for (i = *len_ptr; i < *len_ptr + padding; i++) {
         nums_after_straddle[i] = 9;
     }
-    ciphertext_len += padding;
+    *len_ptr += padding;
 
     /* Columnar Transposition 1 (Keyed) */
-    int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, ciphertext_len, line_Q_R_Sequenced, pa1);
+    int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, *len_ptr, line_Q_R_Sequenced, pa1);
 
     /* Columnar Transposition 2 (Keyed 2-Triangular) */
     int t2_first = 10;
@@ -277,7 +265,7 @@ int* vic() {
             }
         }
     }
-    int t2_rows = ((int)(ciphertext_len / pa2)) + 1;
+    int t2_rows = ((int)(*len_ptr / pa2)) + 1;
     int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
 
     pos = 0;
@@ -296,11 +284,11 @@ int* vic() {
         transpose_table[i] = num;
     }
 
-    int* t2_after_offset = offset_columns_int(after_columnar_transposition_1, ciphertext_len, transpose_table, t2_rows, pa2);
-    int* ciphertext = keyed_columnar_transposition_int(t2_after_offset, ciphertext_len, &(line_Q_R_Sequenced[pa1]), pa2);
+    int* t2_after_offset = offset_columns_int(after_columnar_transposition_1, *len_ptr, transpose_table, t2_rows, pa2);
+    int* ciphertext = keyed_columnar_transposition_int(t2_after_offset, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
     /* Add indicator to ciphertext */
-    int group_count = (ciphertext_len/5) + 1;
+    int group_count = (*len_ptr/5) + 1;
     int indicator_group = group_count - date_number[5];
     int* final_text = (int*)malloc((group_count * 5) * sizeof(int));
     for (i = 0; i < indicator_group * 5; i++) {
@@ -309,7 +297,7 @@ int* vic() {
     for (i = 0; i < 5; i++) {
         final_text[(indicator_group * 5) + i] = keygroup_number[i];
     }
-    for (i = indicator_group * 5; i < ciphertext_len; i++) {
+    for (i = indicator_group * 5; i < *len_ptr; i++) {
         final_text[i + 5] = ciphertext[i];
     }
 
@@ -322,6 +310,8 @@ int* vic() {
     free(text_after_straddle);
     free(line_Q_R_Sequenced);
     free(line_Q_R);
+
+    *len_ptr += 5;
 
     return final_text;
 }
