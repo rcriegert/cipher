@@ -12,14 +12,17 @@
 #include "../Headers/H_FILES/sequencing.h"
 #include "VIC.h"
 
-/* TODO - Make this accept passed arguments */
-int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], unsigned char straddle_alphabet[], int* len_ptr) {
-    /* Starting Information */
+/* TODO - rename */
+int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], int* pa1_ptr, int* pa2_ptr) {
     /* TODO - Can I move allocations/instantiations up? */
-    int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+    /* TODO - Clean up comments */
 
     int i;
     int j;
+    int num;
+    int pos;
+
+    int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
 
     /* Line F Start */
 
@@ -41,8 +44,6 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     /* Note - phrase messed up by +26 after this section */
     /* Note - phrase must be all one case, no spaces/special symbols */
 
-    int pos;
-    int num;
     int e_1[10];
     for (i = 1; i < 11; i++) {
         pos = 0;
@@ -142,8 +143,8 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     /* Permutation Keys End */
 
     /* Allocations for Q, R */
-    int* line_Q_R = malloc(sizeof(int) * (pa1 + pa2));
-    int* line_Q_R_Sequenced = malloc(sizeof(int) * (pa1 + pa2));
+    int* line_Q_R = (int*)malloc(sizeof(int) * (pa1 + pa2));
+    int* line_Q_R_Sequenced = (int*)malloc(sizeof(int) * (pa1 + pa2));
 
     /* Lines Q-R Start */
 
@@ -210,7 +211,8 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
 
 
     /* Straddling Checkerboard Top Line Creation Start */
-    int straddle_line[10];
+    /* TODO - Safe malloc) */
+    int* straddle_line = (int*)malloc(10 * sizeof(int));
     for (i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
@@ -225,6 +227,33 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     }
     /* Straddling Checkerboard Top Line Creation End */
     /* NOTE: Line H_P 50-59 is 10 more than it should be at this point */
+
+    *pa1_ptr = pa1;
+    *pa2_ptr = pa2;
+
+    free(line_Q_R);
+
+    int** returns = (int**)malloc(2*sizeof(int*));
+    returns[0] = line_Q_R_Sequenced;
+    returns[1] = straddle_line;
+
+    return returns;
+}
+
+/* TODO - Move general en/decrypt functionalities to separate function */
+int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], unsigned char straddle_alphabet[], int* len_ptr) {
+    /* TODO - Can I move allocations/instantiations up? */
+
+    int i;
+    int num;
+    int pos;
+    int pa1 = 0;
+    int pa2 = 0;
+
+    /* TODO - Separate pa1/pa2 creation? idk */
+    int** return_vals = vic_creation_straddle_pa1_pa2(personal_number, date_number, phrase, keygroup_number, &pa1, &pa2);
+    int* line_Q_R_Sequenced = return_vals[0];
+    int* straddle_line = return_vals[1];
 
     /* Encode with Straddle Start */
     unsigned char* text_after_straddle = straddle_checkerboard_encode(plaintext, straddle_line, straddle_alphabet, len_ptr);
@@ -309,9 +338,22 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     free(nums_after_straddle);
     free(text_after_straddle);
     free(line_Q_R_Sequenced);
-    free(line_Q_R);
+    free(straddle_line);
+    free(return_vals);
 
     *len_ptr += 5;
 
     return final_text;
+}
+
+/* TODO - this */
+unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_number[], unsigned char phrase[], unsigned char straddle_alphabet[], int* len_ptr) {
+    int i;
+    int keygroup_number[5];
+    int indicator_group = *len_ptr - (date_number[5] * 5);
+    for (i = 0; i < 5; i++) {
+        keygroup_number[i] = ciphertext[indicator_group + i];
+    }
+
+    return NULL;
 }
