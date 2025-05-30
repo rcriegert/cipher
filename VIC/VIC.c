@@ -273,7 +273,7 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     *len_ptr += padding;
 
     /* Columnar Transposition 1 (Keyed) */
-    int* after_columnar_transposition_1 = keyed_columnar_transposition_int(nums_after_straddle, *len_ptr, line_Q_R_Sequenced, pa1);
+    int* after_columnar_transposition_1 = columnar_transposition_keyed_encode_int(nums_after_straddle, *len_ptr, line_Q_R_Sequenced, pa1);
 
     /* Columnar Transposition 2 (Keyed 2-Triangular) */
     int t2_first = 10;
@@ -313,8 +313,8 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
         transpose_table[i] = num;
     }
 
-    int* t2_after_offset = offset_columns_int(after_columnar_transposition_1, *len_ptr, transpose_table, t2_rows, pa2);
-    int* ciphertext = keyed_columnar_transposition_int(t2_after_offset, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
+    int* t2_after_offset = offset_columnar_transposition_encode_int(after_columnar_transposition_1, *len_ptr, transpose_table, t2_rows, pa2);
+    int* ciphertext = columnar_transposition_keyed_encode_int(t2_after_offset, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
     /* Add indicator to ciphertext */
     int group_count = (*len_ptr/5) + 1;
@@ -349,11 +349,72 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
 /* TODO - this */
 unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_number[], unsigned char phrase[], unsigned char straddle_alphabet[], int* len_ptr) {
     int i;
+    int j;
+    int num;
+    int pos;
     int keygroup_number[5];
     int indicator_group = *len_ptr - (date_number[5] * 5);
     for (i = 0; i < 5; i++) {
         keygroup_number[i] = ciphertext[indicator_group + i];
     }
+    /* Removes indicator group (well, kinda. it copies everything over to the left to erase the indicator group, BUT */
+    for (i = indicator_group * 5; i < len_ptr - 5; i++) {
+        ciphertext[i] = ciphertext[i+5];
+    }
+    *len_ptr -= 5;
+    int pa1;
+    int pa2;
+
+    int** return_vals = vic_creation_straddle_pa1_pa2(personal_number, date_number, phrase, keygroup_number, &pa1, &pa2);
+    int* line_Q_R_Sequenced = return_vals[0];
+    int* straddle_line = return_vals[1];
+
+    int t2_first = 10;
+    int t2_second = 10;
+    int t2_first_index = 0;
+    int t2_second_index = 0;
+    for (i = pa1; i < pa1 + pa2; i++) {
+        if (line_Q_R_Sequenced[i] < t2_second) {
+            if (line_Q_R_Sequenced[i] < t2_first) {
+                t2_second = t2_first;
+                t2_second_index = t2_first_index;
+                t2_first = line_Q_R_Sequenced[i];
+                t2_first_index = i - pa1;
+            }
+            else {
+                t2_second = line_Q_R_Sequenced[i];
+                t2_second_index = i - pa1;
+            }
+        }
+    }
+    int t2_rows = ((int)(*len_ptr / pa2)) + 1;
+    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
+
+    pos = 0;
+    transpose_table[0] = t2_first_index;
+    num = t2_first_index;
+    for (i = 1; i < t2_rows; i++) {
+        num++;
+        if (num > pa2) {
+            if (pos == 0) {
+                num = t2_second_index;
+            }
+            else {
+                num = pa2;
+            }
+        }
+        transpose_table[i] = num;
+    }
+
+    int* after_t2_keyed =
+    int* t2_finished = offset_columnar_transposition_decode_int(/*SOMETHINGREPLACETHIS*/, *len_ptr, transpose_table, t2_rows, pa2);
+
+
+    free(t2_finished);
+    free(transpose_table);
+    free(line_Q_R_Sequenced);
+    free(straddle_line);
+    free(return_vals);
 
     return NULL;
 }

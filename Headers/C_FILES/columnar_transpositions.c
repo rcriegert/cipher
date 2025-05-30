@@ -1,6 +1,6 @@
 #include "../H_FILES/columnar_transpositions.h"
 
-unsigned char* unkeyed_columnar_transposition_uc(unsigned char plaintext[], int plaintext_len, int column_count) {
+unsigned char* columnar_transposition_unkeyed_encode_uc(unsigned char plaintext[], int plaintext_len, int column_count) {
     /* TODO - Bounds check column_count */
     /* TODO - safe malloc */
 
@@ -22,7 +22,7 @@ unsigned char* unkeyed_columnar_transposition_uc(unsigned char plaintext[], int 
 
 
 /* Assumes key is already in order numbered: 0 -> len - 1 */
-unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int plaintext_len, int key[], int key_len) {
+unsigned char* columnar_transposition_keyed_encode_uc(unsigned char plaintext[], int plaintext_len, int key[], int key_len) {
     /* TODO - Check if key[] is set up correctly */
     /* TODO - safe malloc */
 
@@ -41,11 +41,11 @@ unsigned char* keyed_columnar_transposition_uc(unsigned char plaintext[], int pl
     return ciphertext;
 }
 
-/* TODO - Add unkeyed int */
+/* TODO - Add unkeyed int, decodes, etc. */
 
 
 /* Assumes key is already in order numbered: 0 -> len - 1 */
-int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* key, int key_len) {
+int* columnar_transposition_keyed_encode_int(int* plaintext, int plaintext_len, int* key, int key_len) {
     /* TODO - Check if key[] is set up correctly */
     /* TODO - safe malloc */
 
@@ -76,17 +76,23 @@ int* keyed_columnar_transposition_int(int* plaintext, int plaintext_len, int* ke
     }
     return ciphertext;
 }
+int* columnar_transposition_keyed_decode_int(int* ciphertext, int ciphertext_len, int* key, int key_len){
+    /* TODO - Check if key[] is set up correctly */
+    /* TODO - safe malloc */
 
-/* Write something here, and what is the actual name of this?? */
-int* offset_columns_int(int* plaintext, int plaintext_len, int* offset, int offset_len, int column_count) {
+
+}
+
+/* TODO - this isn't actually transposing, it's re-arranging. Move to a different file, and figure out the name... */
+int* offset_columnar_transposition_encode_int(int* plaintext, int plaintext_len, int* offset, int offset_len, int column_count) {
     /* TODO - Check if offset[] is set up correctly */
     /* TODO - safe malloc */
 
     /* adjustment */
-    int* ciphertext = (int*)calloc(plaintext_len, sizeof(int));
-    int curr = 0;
+    int* ciphertext = (int*)malloc(plaintext_len * sizeof(int));
     int i;
     int j;
+    int curr = 0;
     for (i = 0; i < offset_len; i++) {
         for (j = 0; j < offset[i]; j++) {
             ciphertext[(i*column_count) + j] = plaintext[curr];
@@ -104,3 +110,30 @@ int* offset_columns_int(int* plaintext, int plaintext_len, int* offset, int offs
 
     return ciphertext;
 }
+
+/* TODO - this isn't actually transposing, it's re-arranging. Move to a different file, and figure out the name... */
+int* offset_columnar_transposition_decode_int(int* ciphertext, int ciphertext_len, int* offset, int offset_len, int column_count) {
+    /* TODO - Check if offset[] is set up correctly */
+    /* TODO - safe malloc */
+    int* plaintext = (int*)malloc(ciphertext_len * sizeof(int));
+    int i;
+    int j;
+    int curr = 0;
+    for (i = offset_len - 1; i >= 0; i--) {
+        for (j = column_count - 1; j >= offset[i]; j--) {
+            plaintext[curr] = ciphertext[(i*column_count) + j];
+            curr++;
+        }
+    }
+    for (i = offset_len - 1; i >= 0; i--) {
+        for (j = offset[i] - 1; j >= 0; j--) {
+            if (curr < plaintext_len) {
+                ciphertext[(i*column_count) + j] = plaintext[curr];
+                curr++;
+            }
+        }
+    }
+
+    return plaintext;
+}
+
