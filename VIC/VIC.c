@@ -262,7 +262,7 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     int padding = 5 - (*len_ptr % 5);
     int* nums_after_straddle = (int*)malloc((*len_ptr + padding) * sizeof(int));
     for (i = 0; i < *len_ptr; i++) {
-        nums_after_straddle[i] = text_after_straddle[i];
+        nums_after_straddle[i] = atoi(text_after_straddle[i]);
     }
 
     /* Pad to *len_ptr % 5 == 0 */
@@ -408,9 +408,18 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
     int* t2_finished = offset_columnar_transposition_decode_int(after_t2_keyed, *len_ptr, transpose_table, t2_rows, pa2);
 
+    int* t1_finished = columnar_transposition_keyed_decode_int(t2_finished, *len_ptr, line_Q_R_Sequenced, pa1);
 
-    free(after_t2_keyed);
+    for (i = 0; i < *len_ptr; i++) {
+        printf("%d ", t1_finished[i]);
+    }
+    printf("\n");
+
+
+
+    free(t1_finished);
     free(t2_finished);
+    free(after_t2_keyed);
     free(transpose_table);
     free(line_Q_R_Sequenced);
     free(straddle_line);

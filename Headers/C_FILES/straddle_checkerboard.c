@@ -24,6 +24,35 @@ void straddle_char_encode(unsigned char character, unsigned char ciphertext[], i
     return;
 }
 
+int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len_ptr, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
+    int i;
+    if (num1 != straddle_space_1 && num1 != straddle_space_2) {
+        for (i = 0; i < 10; i++) {
+            if (straddle_line[i] == num1) {
+                plaintext[*len_ptr] = straddle_alphabet[i];
+                *len_ptr += 1;
+                return 1;
+            }
+        }
+        return -1;
+    }
+    int tens_val;
+    if (num1 == straddle_space_1) {
+        tens_val = 10;
+    }
+    else {
+        tens_val = 20;
+    }
+    for (i = 0; i < 10; i++) {
+        if (num2 == straddle_line[i]) {
+            plaintext[*len_ptr] = straddle_alphabet[tens_val + i];
+            *len_ptr + 1;
+            return 2;
+        }
+    }
+    return -1;
+}
+
 unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int straddle_line[], unsigned char straddle_alphabet[], int* len_ptr) {
     /* Assumes top line does not have / or . */
     /* Assumes plaintext has only letters & numbers */
@@ -92,3 +121,46 @@ unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int strad
     *len_ptr = pos;
     return ciphertext;
 }
+
+unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[], unsigned char straddle_alphabet, int* len_ptr) {
+    /* TODO - re-write this section? Is it correct? Just copy-paste... */
+    /* Assumes top line does not have / or . */
+    /* Assumes plaintext has only letters & numbers */
+    /* TODO - Rename len_ptr/pos/original_len variables so they make more sense */
+    /* TODO - clean up variable declaration */
+
+    int i;
+
+    /* Grab straddle space start */
+    int straddle_space_1 = -1;
+    int straddle_space_2;
+    for (i = 0; i < 10; i++) {
+        if (straddle_alphabet[i] == ' ') {
+            if (straddle_space_1 == -1) {
+                straddle_space_1 = i;
+            }
+            else {
+                straddle_space_2 = i;
+            }
+        }
+    }
+    /* Grab straddle space end */
+
+    int original_len = *len_ptr;
+    unsigned char* plaintext = malloc(*len_ptr * sizeof(unsigned char));
+
+    /* Deal with numbers... */
+    i = 0;
+    while (i < original_len - 1) {
+        int return_val = straddle_char_decode(ciphertext[i], ciphertext[i+1], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
+        if (return_val != -1) {
+            i += return_val;
+        }
+        else {
+            /* Handle Error */
+            /* Actually this can be, but only when this is done...*/
+            printf("This should never be printed!!!!!\n");
+        }
+    }
+}
+
