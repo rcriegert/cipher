@@ -102,14 +102,16 @@ int main() {
 
     int* vic_end = vic_encrypt(plaintext, personal_number, date_number, phrase, keygroup_number, straddle_alphabet, &ciphertext_len);
 
-    int i;
+    /*int i;
     for (i = 0; i < ciphertext_len; i++) {
         printf("%d ", vic_end[i]);
         if (i%5 == 4) {
             printf("\n");
         }
-    }
+    }*/
+    int vic_free = vic_decrypt(vic_end, personal_number, date_number, phrase, straddle_alphabet, &ciphertext_len);
 
+    free(vic_free);
 
 
     /* Cleanup */

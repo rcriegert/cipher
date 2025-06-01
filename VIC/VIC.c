@@ -313,6 +313,7 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
         transpose_table[i] = num;
     }
 
+
     int* t2_after_offset = offset_columnar_transposition_encode_int(after_columnar_transposition_1, *len_ptr, transpose_table, t2_rows, pa2);
     int* ciphertext = columnar_transposition_keyed_encode_int(t2_after_offset, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
@@ -358,7 +359,7 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
         keygroup_number[i] = ciphertext[indicator_group + i];
     }
     /* Removes indicator group (well, kinda. it copies everything over to the left to erase the indicator group, BUT */
-    for (i = indicator_group * 5; i < len_ptr - 5; i++) {
+    for (i = indicator_group; i < *len_ptr - 5; i++) {
         ciphertext[i] = ciphertext[i+5];
     }
     *len_ptr -= 5;
@@ -368,7 +369,6 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     int** return_vals = vic_creation_straddle_pa1_pa2(personal_number, date_number, phrase, keygroup_number, &pa1, &pa2);
     int* line_Q_R_Sequenced = return_vals[0];
     int* straddle_line = return_vals[1];
-
     int t2_first = 10;
     int t2_second = 10;
     int t2_first_index = 0;
@@ -405,11 +405,11 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
         }
         transpose_table[i] = num;
     }
+    int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
+    int* t2_finished = offset_columnar_transposition_decode_int(after_t2_keyed, *len_ptr, transpose_table, t2_rows, pa2);
 
-    int* after_t2_keyed =
-    int* t2_finished = offset_columnar_transposition_decode_int(/*SOMETHINGREPLACETHIS*/, *len_ptr, transpose_table, t2_rows, pa2);
 
-
+    free(after_t2_keyed);
     free(t2_finished);
     free(transpose_table);
     free(line_Q_R_Sequenced);

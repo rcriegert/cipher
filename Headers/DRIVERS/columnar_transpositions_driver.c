@@ -39,7 +39,7 @@ int columnar_transpositions_tests() {
         free(ciphertext);
     }
 
-    /* Test 3 -- Keyed Columnar Transposition */s
+    /* Test 3 -- Keyed Columnar Transposition */
     {
         unsigned char plaintext[] = "abcdefghijklmnopqrstuvwxyz";
         int plaintext_len = 26;

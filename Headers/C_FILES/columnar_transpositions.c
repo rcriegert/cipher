@@ -79,8 +79,34 @@ int* columnar_transposition_keyed_encode_int(int* plaintext, int plaintext_len, 
 int* columnar_transposition_keyed_decode_int(int* ciphertext, int ciphertext_len, int* key, int key_len){
     /* TODO - Check if key[] is set up correctly */
     /* TODO - safe malloc */
+    /* TODO - rename curr_row */
 
+    int curr_row = 0;
+    int curr_key_index = 0;
+    int curr_key_num = 0;
+    int i;
+    int j;
+    for (i = 0; i < key_len; i++) {
+        if (key[i] == curr_key_num) {
+            curr_key_index = i;
+        }
+    }
 
+    int* plaintext = (int*)malloc(ciphertext_len * sizeof(int));
+    for (i = 0; i < ciphertext_len; i++) {
+        if ((curr_row * key_len) + curr_key_index >= ciphertext_len) {
+            curr_key_num++;
+            for (j = 0; j < key_len; j++) {
+                if (key[j] == curr_key_num) {
+                    curr_key_index = j;
+                }
+            }
+            curr_row = 0;
+        }
+        plaintext[(curr_row * key_len) + curr_key_index] = ciphertext[i];
+        curr_row++;
+    }
+    return plaintext;
 }
 
 /* TODO - this isn't actually transposing, it's re-arranging. Move to a different file, and figure out the name... */
@@ -119,16 +145,16 @@ int* offset_columnar_transposition_decode_int(int* ciphertext, int ciphertext_le
     int i;
     int j;
     int curr = 0;
-    for (i = offset_len - 1; i >= 0; i--) {
-        for (j = column_count - 1; j >= offset[i]; j--) {
+    for (i = 0; i < offset_len; i++) {
+        for (j = 0; j < offset[i]; j++) {
             plaintext[curr] = ciphertext[(i*column_count) + j];
             curr++;
         }
     }
-    for (i = offset_len - 1; i >= 0; i--) {
-        for (j = offset[i] - 1; j >= 0; j--) {
-            if (curr < plaintext_len) {
-                ciphertext[(i*column_count) + j] = plaintext[curr];
+    for (i = 0; i < offset_len; i++) {
+        for (j = offset[i]; j < column_count; j++) {
+            if (curr < ciphertext_len) {
+                plaintext[curr] = ciphertext[(i*column_count) + j];
                 curr++;
             }
         }
