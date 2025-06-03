@@ -262,7 +262,7 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     int padding = 5 - (*len_ptr % 5);
     int* nums_after_straddle = (int*)malloc((*len_ptr + padding) * sizeof(int));
     for (i = 0; i < *len_ptr; i++) {
-        nums_after_straddle[i] = atoi(text_after_straddle[i]);
+        nums_after_straddle[i] = text_after_straddle[i];
     }
 
     /* Pad to *len_ptr % 5 == 0 */
@@ -313,7 +313,6 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
         transpose_table[i] = num;
     }
 
-
     int* t2_after_offset = offset_columnar_transposition_encode_int(after_columnar_transposition_1, *len_ptr, transpose_table, t2_rows, pa2);
     int* ciphertext = columnar_transposition_keyed_encode_int(t2_after_offset, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
@@ -350,7 +349,6 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
 /* TODO - this */
 unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_number[], unsigned char phrase[], unsigned char straddle_alphabet[], int* len_ptr) {
     int i;
-    int j;
     int num;
     int pos;
     int keygroup_number[5];
@@ -406,16 +404,36 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
         transpose_table[i] = num;
     }
     int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
+
     int* t2_finished = offset_columnar_transposition_decode_int(after_t2_keyed, *len_ptr, transpose_table, t2_rows, pa2);
 
     int* t1_finished = columnar_transposition_keyed_decode_int(t2_finished, *len_ptr, line_Q_R_Sequenced, pa1);
 
-    for (i = 0; i < *len_ptr; i++) {
-        printf("%d ", t1_finished[i]);
+    /* TODO - How do I handle VIC now being accurate to the straddle? */
+    int solution_index = -1;
+    unsigned char* temp_solution;
+    unsigned char* solution = NULL;
+    int temp_len;
+    for (i = 4; i >= 0; i--) {
+        temp_len = *len_ptr - i;
+        temp_solution = straddle_checkerboard_decode(t1_finished, straddle_line, straddle_alphabet, &temp_len);
+        if (temp_solution != NULL) {
+            solution_index = i;
+            if (solution != NULL) {
+                free(solution);
+            }
+            solution = temp_solution;
+        }
     }
-    printf("\n");
 
-
+    if (solution == NULL) {
+        *len_ptr = 0;
+        printf("uhoh........\n");
+    }
+    else {
+        *len_ptr = temp_len;
+        printf(":D, %d\n", *len_ptr);
+    }
 
     free(t1_finished);
     free(t2_finished);
@@ -425,5 +443,5 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     free(straddle_line);
     free(return_vals);
 
-    return NULL;
+    return solution;
 }

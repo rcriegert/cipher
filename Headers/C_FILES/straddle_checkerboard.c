@@ -26,7 +26,7 @@ void straddle_char_encode(unsigned char character, unsigned char ciphertext[], i
 
 int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len_ptr, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
     int i;
-    if (num1 != straddle_space_1 && num1 != straddle_space_2) {
+    if (num1 != straddle_line[straddle_space_1] && num1 != straddle_line[straddle_space_2]) {
         for (i = 0; i < 10; i++) {
             if (straddle_line[i] == num1) {
                 plaintext[*len_ptr] = straddle_alphabet[i];
@@ -37,7 +37,7 @@ int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len
         return -1;
     }
     int tens_val;
-    if (num1 == straddle_space_1) {
+    if (num1 == straddle_line[straddle_space_1]) {
         tens_val = 10;
     }
     else {
@@ -46,7 +46,7 @@ int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len
     for (i = 0; i < 10; i++) {
         if (num2 == straddle_line[i]) {
             plaintext[*len_ptr] = straddle_alphabet[tens_val + i];
-            *len_ptr + 1;
+            *len_ptr += 1;
             return 2;
         }
     }
@@ -122,7 +122,7 @@ unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int strad
     return ciphertext;
 }
 
-unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[], unsigned char straddle_alphabet, int* len_ptr) {
+unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[], unsigned char straddle_alphabet[], int* len_ptr) {
     /* TODO - re-write this section? Is it correct? Just copy-paste... */
     /* Assumes top line does not have / or . */
     /* Assumes plaintext has only letters & numbers */
@@ -130,7 +130,7 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
     /* TODO - clean up variable declaration */
 
     int i;
-
+    int number;
     /* Grab straddle space start */
     int straddle_space_1 = -1;
     int straddle_space_2;
@@ -145,22 +145,82 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
         }
     }
     /* Grab straddle space end */
-
     int original_len = *len_ptr;
     unsigned char* plaintext = malloc(*len_ptr * sizeof(unsigned char));
 
     /* Deal with numbers... */
+    /* TODO - finish this */
+    /* TODO - the sections can be printed, just change that to something more useful */
     i = 0;
+    number = 0;
+    *len_ptr = 0;
     while (i < original_len - 1) {
-        int return_val = straddle_char_decode(ciphertext[i], ciphertext[i+1], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
-        if (return_val != -1) {
-            i += return_val;
+        if (number == 0) {
+            int return_val = straddle_char_decode(ciphertext[i], ciphertext[i+1], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
+            if (return_val != -1) {
+                if (plaintext[i] == '/') {
+                    *len_ptr -= 1;
+                    number = 1;
+                    i += 2;
+                }
+                else {
+                    i += return_val;
+                }
+            }
+            else {
+                /* Handle Error */
+                printf("This should never be printed!!!!!\n");
+                free(plaintext);
+                plaintext = NULL;
+                return plaintext;
+            }
         }
         else {
-            /* Handle Error */
-            /* Actually this can be, but only when this is done...*/
-            printf("This should never be printed!!!!!\n");
+            /* if it is a number, ciphertext[i] == ciphertext[i+1] == ciphertext[i+2] */
+            /* if it is ending, ciphertext[i] != ciphertext[i+1] because layer 2 on straddle is not a double */
+            if (ciphertext[i] != ciphertext[i+1]) {
+                i += 3;
+                number = 0;
+            }
+            else {
+                /* Also have to be checking for OOB array access... (could be over end and in bs range for VIC) */
+                /* Also, this is a vic issue not a straddle_checkerboard issue. screw VIC. figure it out there & not here */
+                int return_val = straddle_char_decode(ciphertext[i], ciphertext[i+1], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
+                if (return_val != 1) {
+                    if (plaintext[i] == '/') {
+                        *len_ptr -= 1;
+                        number = 0;
+                        i += 2;
+                    }
+                    else {
+                        /* Handle Error */
+                        printf("This should never be printed!!!!!\n");
+                        free(plaintext);
+                        plaintext = NULL;
+                        return plaintext;
+                    }
+                }
+                else {
+                    /* Handle Error */
+                    printf("This should never be printed!!!!!\n");
+                    free(plaintext);
+                    plaintext = NULL;
+                    return plaintext;
+                }
+            }
         }
     }
+    if (i != original_len) {
+        /* Double-sends i, because if this runs the last character is a single */
+        int return_val = straddle_char_decode(ciphertext[i], ciphertext[i], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
+        if (return_val != 1) {
+            /* Handle Error */
+            printf("This should never be printed!!!!!\n");
+            free(plaintext);
+            plaintext = NULL;
+            return plaintext;
+        }
+    }
+    return plaintext;
 }
 
