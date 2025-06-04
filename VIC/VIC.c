@@ -12,7 +12,8 @@
 #include "../Headers/H_FILES/sequencing.h"
 #include "VIC.h"
 
-/* TODO - rename */
+/* TODO - rename? maybe send back pa1/pa2 in return array? */
+/* TODO - do stuff here (safe mallocs, nice looking code, other failure checks, etc.) */
 int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], int* pa1_ptr, int* pa2_ptr) {
     /* TODO - Can I move allocations/instantiations up? */
     /* TODO - Clean up comments */
@@ -240,7 +241,7 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
     return returns;
 }
 
-/* TODO - Move general en/decrypt functionalities to separate function */
+/* TODO - do stuff here (safe mallocs, nice looking code, other failure checks, etc.) */
 int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], unsigned char straddle_alphabet[], int* len_ptr) {
     /* TODO - Can I move allocations/instantiations up? */
 
@@ -346,27 +347,41 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
     return final_text;
 }
 
-/* TODO - this */
+/* TODO - do stuff here (safe mallocs, other failure checks, etc.) */
 unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_number[], unsigned char phrase[], unsigned char straddle_alphabet[], int* len_ptr) {
+    /* TODO - check that the data being sent is not rubbish */
+
+    /* Simple instantiations */
     int i;
     int num;
     int pos;
+
+    /* Find indicator group */
     int keygroup_number[5];
     int indicator_group = *len_ptr - (date_number[5] * 5);
     for (i = 0; i < 5; i++) {
         keygroup_number[i] = ciphertext[indicator_group + i];
     }
-    /* Removes indicator group (well, kinda. it copies everything over to the left to erase the indicator group, BUT */
+
+    /* Remove indicator group (It actually copies everything over to the left & overwrites the indicator group, BUT length is changed so in practice it works) */
     for (i = indicator_group; i < *len_ptr - 5; i++) {
         ciphertext[i] = ciphertext[i+5];
     }
     *len_ptr -= 5;
+
+    /* Get straddle line & other general VIC information */
     int pa1;
     int pa2;
-
     int** return_vals = vic_creation_straddle_pa1_pa2(personal_number, date_number, phrase, keygroup_number, &pa1, &pa2);
     int* line_Q_R_Sequenced = return_vals[0];
     int* straddle_line = return_vals[1];
+    int t2_rows = ((int)(*len_ptr / pa2)) + 1;
+
+    /* Undo Second Columnar Transposition */
+    int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
+
+    /* Build transpose table */
+    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
     int t2_first = 10;
     int t2_second = 10;
     int t2_first_index = 0;
@@ -385,9 +400,6 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
             }
         }
     }
-    int t2_rows = ((int)(*len_ptr / pa2)) + 1;
-    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
-
     pos = 0;
     transpose_table[0] = t2_first_index;
     num = t2_first_index;
@@ -403,13 +415,15 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
         }
         transpose_table[i] = num;
     }
-    int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
+    /* Undo Message Transposition */
     int* t2_finished = offset_columnar_transposition_decode_int(after_t2_keyed, *len_ptr, transpose_table, t2_rows, pa2);
 
+    /* Finish Undoing Columnar Transpositions */
     int* t1_finished = columnar_transposition_keyed_decode_int(t2_finished, *len_ptr, line_Q_R_Sequenced, pa1);
 
-    /* TODO - How do I handle VIC now being accurate to the straddle? */
+    /* Since VIC can have 0-4 extra random characters at the end, we assume the longest text with a valid straddle checkerboard decryption is correct */
+    /* Theoretically it can have up to garbage characters at the end, but a human should be able to parse them out */
     int solution_index = -1;
     unsigned char* temp_solution;
     unsigned char* solution = NULL;
@@ -426,15 +440,15 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
         }
     }
 
+    /* Set len_ptr */
     if (solution == NULL) {
         *len_ptr = 0;
-        printf("uhoh........\n");
     }
     else {
         *len_ptr = temp_len;
-        printf(":D, %d\n", *len_ptr);
     }
 
+    /* Cleanup */
     free(t1_finished);
     free(t2_finished);
     free(after_t2_keyed);
@@ -443,5 +457,6 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     free(straddle_line);
     free(return_vals);
 
+    /* Return */
     return solution;
 }

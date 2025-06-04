@@ -24,11 +24,15 @@ unsigned char* columnar_transposition_unkeyed_encode_uc(unsigned char plaintext[
 /* Assumes key is already in order numbered: 0 -> len - 1 */
 unsigned char* columnar_transposition_keyed_encode_uc(unsigned char plaintext[], int plaintext_len, int key[], int key_len) {
     /* TODO - Check if key[] is set up correctly */
-    /* TODO - safe malloc */
 
     int curr_row = 0;
     int curr_key_index = 0;
-    unsigned char* ciphertext = (unsigned char*)malloc(plaintext_len * sizeof(unsigned char));
+    unsigned char* ciphertext = malloc(plaintext_len * sizeof(unsigned char));
+    if (ciphertext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     int i;
     for (i = 0; i < plaintext_len; i++) {
         if ((curr_row * key_len) + key[curr_key_index] >= plaintext_len) {
@@ -47,7 +51,6 @@ unsigned char* columnar_transposition_keyed_encode_uc(unsigned char plaintext[],
 /* Assumes key is already in order numbered: 0 -> len - 1 */
 int* columnar_transposition_keyed_encode_int(int* plaintext, int plaintext_len, int* key, int key_len) {
     /* TODO - Check if key[] is set up correctly */
-    /* TODO - safe malloc */
 
     int curr_row = 0;
     int curr_key_index = 0;
@@ -60,7 +63,12 @@ int* columnar_transposition_keyed_encode_int(int* plaintext, int plaintext_len, 
         }
     }
 
-    int* ciphertext = (int*)malloc(plaintext_len * sizeof(int));
+    int* ciphertext = malloc(plaintext_len * sizeof(int));
+    if (ciphertext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     for (i = 0; i < plaintext_len; i++) {
         if ((curr_row * key_len) + curr_key_index >= plaintext_len) {
             curr_key_num++;
@@ -78,7 +86,6 @@ int* columnar_transposition_keyed_encode_int(int* plaintext, int plaintext_len, 
 }
 int* columnar_transposition_keyed_decode_int(int* ciphertext, int ciphertext_len, int* key, int key_len){
     /* TODO - Check if key[] is set up correctly */
-    /* TODO - safe malloc */
     /* TODO - rename curr_row */
 
     int curr_row = 0;
@@ -93,6 +100,11 @@ int* columnar_transposition_keyed_decode_int(int* ciphertext, int ciphertext_len
     }
 
     int* plaintext = (int*)malloc(ciphertext_len * sizeof(int));
+    if (plaintext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     for (i = 0; i < ciphertext_len; i++) {
         if ((curr_row * key_len) + curr_key_index >= ciphertext_len) {
             curr_key_num++;
@@ -112,10 +124,14 @@ int* columnar_transposition_keyed_decode_int(int* ciphertext, int ciphertext_len
 /* TODO - this isn't actually transposing, it's re-arranging. Move to a different file, and figure out the name... */
 int* offset_columnar_transposition_encode_int(int* plaintext, int plaintext_len, int* offset, int offset_len, int column_count) {
     /* TODO - Check if offset[] is set up correctly */
-    /* TODO - safe malloc */
 
     /* adjustment */
     int* ciphertext = (int*)malloc(plaintext_len * sizeof(int));
+    if (ciphertext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     int i;
     int j;
     int curr = 0;
@@ -140,8 +156,12 @@ int* offset_columnar_transposition_encode_int(int* plaintext, int plaintext_len,
 /* TODO - this isn't actually transposing, it's re-arranging. Move to a different file, and figure out the name... */
 int* offset_columnar_transposition_decode_int(int* ciphertext, int ciphertext_len, int* offset, int offset_len, int column_count) {
     /* TODO - Check if offset[] is set up correctly */
-    /* TODO - safe malloc */
     int* plaintext = (int*)malloc(ciphertext_len * sizeof(int));
+    if (plaintext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     int i;
     int j;
     int curr = 0;

@@ -111,10 +111,8 @@ int main() {
         printf("%c ", vic_free[i]);
     }
 
-    free(vic_free);
-
-
     /* Cleanup */
+    free(vic_free);
     free(vic_end);
     return 0;
 }

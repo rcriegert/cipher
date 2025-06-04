@@ -25,7 +25,9 @@ void straddle_char_encode(unsigned char character, unsigned char ciphertext[], i
 }
 
 int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len_ptr, int straddle_line[], unsigned char straddle_alphabet[], int straddle_space_1, int straddle_space_2) {
+    // Returns -1 if cannot decode correctly, otherwise length of decoded section (of ciphertext, plaintext is always 1)
     int i;
+    // If len 1
     if (num1 != straddle_line[straddle_space_1] && num1 != straddle_line[straddle_space_2]) {
         for (i = 0; i < 10; i++) {
             if (straddle_line[i] == num1) {
@@ -36,16 +38,15 @@ int straddle_char_decode(int num1, int num2, unsigned char plaintext[], int* len
         }
         return -1;
     }
-    int tens_val;
-    if (num1 == straddle_line[straddle_space_1]) {
-        tens_val = 10;
-    }
-    else {
-        tens_val = 20;
-    }
+    // If len 2
     for (i = 0; i < 10; i++) {
         if (num2 == straddle_line[i]) {
-            plaintext[*len_ptr] = straddle_alphabet[tens_val + i];
+            if (num1 == straddle_line[straddle_space_1]) {
+                plaintext[*len_ptr] = straddle_alphabet[10 + i];
+            }
+            else {
+                plaintext[*len_ptr] = straddle_alphabet[20 + i];
+            }
             *len_ptr += 1;
             return 2;
         }
@@ -78,6 +79,11 @@ unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int strad
 
     /* Encode with Straddle Start */
     unsigned char* ciphertext = malloc(*len_ptr * 2 * sizeof(unsigned char));
+    if (ciphertext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     int pos = 0;
     int original_len = *len_ptr;
     *len_ptr *= 2;
@@ -87,9 +93,14 @@ unsigned char* straddle_checkerboard_encode(unsigned char plaintext[], int strad
     for (i = 0; i < original_len; i++) {
         /* Realloc check */
         if (pos + 5 >= *len_ptr) {
-            unsigned char* temp_alloc;
             /* TODO - Add realloc successful check */
-            temp_alloc = realloc(ciphertext, *len_ptr * 2 * sizeof(unsigned char));
+            unsigned char* temp_alloc = realloc(ciphertext, *len_ptr * 2 * sizeof(unsigned char));
+            if (temp_alloc == NULL) {
+                free(ciphertext);
+                /* TODO - Send back an actual error (somehow) */
+                printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+                return NULL;
+            }
             ciphertext = temp_alloc;
             *len_ptr *= 2;
         }
@@ -131,6 +142,7 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
 
     int i;
     int number;
+
     /* Grab straddle space start */
     int straddle_space_1 = -1;
     int straddle_space_2;
@@ -145,12 +157,15 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
         }
     }
     /* Grab straddle space end */
+
     int original_len = *len_ptr;
     unsigned char* plaintext = malloc(*len_ptr * sizeof(unsigned char));
+    if (plaintext == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
 
-    /* Deal with numbers... */
-    /* TODO - finish this */
-    /* TODO - the sections can be printed, just change that to something more useful */
     i = 0;
     number = 0;
     *len_ptr = 0;
@@ -168,11 +183,8 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
                 }
             }
             else {
-                /* Handle Error */
-                printf("This should never be printed!!!!!\n");
                 free(plaintext);
-                plaintext = NULL;
-                return plaintext;
+                return NULL;
             }
         }
         else {
@@ -183,8 +195,6 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
                 number = 0;
             }
             else {
-                /* Also have to be checking for OOB array access... (could be over end and in bs range for VIC) */
-                /* Also, this is a vic issue not a straddle_checkerboard issue. screw VIC. figure it out there & not here */
                 int return_val = straddle_char_decode(ciphertext[i], ciphertext[i+1], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
                 if (return_val != 1) {
                     if (plaintext[i] == '/') {
@@ -193,19 +203,13 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
                         i += 2;
                     }
                     else {
-                        /* Handle Error */
-                        printf("This should never be printed!!!!!\n");
                         free(plaintext);
-                        plaintext = NULL;
-                        return plaintext;
+                        return NULL;
                     }
                 }
                 else {
-                    /* Handle Error */
-                    printf("This should never be printed!!!!!\n");
                     free(plaintext);
-                    plaintext = NULL;
-                    return plaintext;
+                    return NULL;
                 }
             }
         }
@@ -214,13 +218,11 @@ unsigned char* straddle_checkerboard_decode(int ciphertext[], int straddle_line[
         /* Double-sends i, because if this runs the last character is a single */
         int return_val = straddle_char_decode(ciphertext[i], ciphertext[i], plaintext, len_ptr, straddle_line, straddle_alphabet, straddle_space_1, straddle_space_2);
         if (return_val != 1) {
-            /* Handle Error */
-            printf("This should never be printed!!!!!\n");
             free(plaintext);
-            plaintext = NULL;
-            return plaintext;
+            return NULL;
         }
     }
+
     return plaintext;
 }
 
