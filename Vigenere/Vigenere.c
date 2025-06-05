@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* TODO - Define 0x61 & such in macros */
+/* TODO - Make a Vigenere.h file */
+
 unsigned char* to_lower_and_capital_bit_array(unsigned char* array, int len) {
     unsigned char* bit_array = malloc(sizeof(unsigned char) * (len/4 + 1));
     unsigned char bit = 0x01;

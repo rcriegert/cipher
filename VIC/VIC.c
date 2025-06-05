@@ -13,7 +13,7 @@
 #include "VIC.h"
 
 /* TODO - rename? maybe send back pa1/pa2 in return array? */
-/* TODO - do stuff here (safe mallocs, nice looking code, other failure checks, etc.) */
+/* TODO - do stuff here (nice looking code, other failure checks, etc.) */
 int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsigned char phrase[], int keygroup_number[], int* pa1_ptr, int* pa2_ptr) {
     /* TODO - Can I move allocations/instantiations up? */
     /* TODO - Clean up comments */
@@ -23,10 +23,14 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
     int num;
     int pos;
 
+
+    int line_E[20];
     int line_F[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
+    int line_G[10];
+    int line_H_P[60];
+    int line_J[10];
 
-    /* Line F Start */
-
+    /* Line F */
     for (i = 0; i < 5; i++) {
         if (keygroup_number[i] < date_number[i]) {
             line_F[i] += 10;
@@ -36,16 +40,10 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
     }
     chain_addition(line_F, 5, 10, 10);
 
-    /* Line F End */
-
-    /* Line E Start */
-
-    /* TODO - Combine e_1 & e_2 */
+    /* Line E */
     /* Note - could make into 1 array, and maybe not separate phrase either? */
     /* Note - phrase messed up by +26 after this section */
     /* Note - phrase must be all one case, no spaces/special symbols */
-
-    int e_1[10];
     for (i = 1; i < 11; i++) {
         pos = 0;
         num = 0x7A;
@@ -56,9 +54,8 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
             }
         }
         phrase[pos] += 26;
-        e_1[pos] = i%10;
+        line_E[pos] = i%10;
     }
-    int e_2[10];
     for (i = 1; i < 11; i++) {
         pos = 10;
         num = 0x7A;
@@ -70,38 +67,26 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
         }
 
         phrase[pos] += 26;
-        e_2[pos-10] = i%10;
+        line_E[pos] = i%10;
     }
 
-    /* Line E End */
-
-    /* Line G Start */
-
-    int line_G[10];
+    /* Line G */
     for (i = 0; i < 10; i++) {
-        line_G[i] = (e_1[i] + line_F[i]) % 10;
+        line_G[i] = (line_E[i] + line_F[i]) % 10;
     }
 
-    /* Line G End */
-
-    /* Lines H-P start */
-
-    int line_H_P[60];
+    /* Lines H-P */
     for (i = 0; i < 10; i++) {
         int j = line_G[i] - 1;
         if (j == -1) {
             j = 9;
         }
-        line_H_P[i] = e_2[j];
+        line_H_P[i] = line_E[j+10];
     }
 
     chain_addition(line_H_P, 10, 60, 10);
 
-    /* Lines H-P End */
-
-    /* Line J Start */
-
-    int line_J[10];
+    /* Line J */
     for (i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
@@ -122,11 +107,8 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
         line_H_P[i] -= 10;
     }
 
-    /* Line J End */
-
-    /* Permutation Keys Start */
+    /* Permutation Keys */
     /* TODO - refactor variable names to pk1/2, maybe? */
-
     int pa1;
     int pa2 = line_H_P[59];
     int neq = 1;
@@ -141,14 +123,22 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
     pa1 += personal_number;
     pa2 += personal_number;
 
-    /* Permutation Keys End */
-
     /* Allocations for Q, R */
-    int* line_Q_R = (int*)malloc(sizeof(int) * (pa1 + pa2));
-    int* line_Q_R_Sequenced = (int*)malloc(sizeof(int) * (pa1 + pa2));
+    int* line_Q_R = malloc(sizeof(int) * (pa1 + pa2));
+    if (line_Q_R == NULL) {
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
+    int* line_Q_R_Sequenced = malloc(sizeof(int) * (pa1 + pa2));
+    if (line_Q_R_Sequenced == NULL) {
+        free(line_Q_R);
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
 
-    /* Lines Q-R Start */
-
+    /* Lines Q-R */
     int column_index;
     int column_number = 1;
     for (i = 0; i < 10; i++) {
@@ -174,10 +164,7 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
         }
     }
 
-    /* Lines Q-R End */
-
-    /* Lines Q-R Sequencing Start */
-
+    /* Lines Q-R Sequencing */
     for (i = 0; i < pa1; i++) {
         pos = 0;
         num = 11;
@@ -206,14 +193,16 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
     for (i = 0; i < pa1 + pa2; i++) {
         line_Q_R[i] -= 10;
     }
+    free(line_Q_R);
 
-    /* Lines Q-R Sequencing End */
-
-
-
-    /* Straddling Checkerboard Top Line Creation Start */
-    /* TODO - Safe malloc) */
-    int* straddle_line = (int*)malloc(10 * sizeof(int));
+    /* Straddling Checkerboard Top Line Creation */
+    int* straddle_line = malloc(10 * sizeof(int));
+    if (straddle_line == NULL) {
+        free(line_Q_R_Sequenced);
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     for (i = 0; i < 10; i++) {
         pos = 0;
         num = 10;
@@ -226,15 +215,20 @@ int** vic_creation_straddle_pa1_pa2(int personal_number, int date_number[], unsi
         line_H_P[pos+50] += 10;
         straddle_line[pos] = i;
     }
-    /* Straddling Checkerboard Top Line Creation End */
     /* NOTE: Line H_P 50-59 is 10 more than it should be at this point */
 
+
+    /* Return formatting */
     *pa1_ptr = pa1;
     *pa2_ptr = pa2;
-
-    free(line_Q_R);
-
-    int** returns = (int**)malloc(2*sizeof(int*));
+    int** returns = malloc(2*sizeof(int*));
+    if (returns == NULL) {
+        free(straddle_line);
+        free(line_Q_R_Sequenced);
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     returns[0] = line_Q_R_Sequenced;
     returns[1] = straddle_line;
 
@@ -296,7 +290,7 @@ int* vic_encrypt(unsigned char plaintext[], int personal_number, int date_number
         }
     }
     int t2_rows = ((int)(*len_ptr / pa2)) + 1;
-    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
+    int* transpose_table = malloc(t2_rows * sizeof(int));
 
     pos = 0;
     transpose_table[0] = t2_first_index;
@@ -381,7 +375,16 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     int* after_t2_keyed = columnar_transposition_keyed_decode_int(ciphertext, *len_ptr, &(line_Q_R_Sequenced[pa1]), pa2);
 
     /* Build transpose table */
-    int* transpose_table = (int*)malloc(t2_rows * sizeof(int));
+    int* transpose_table = malloc(t2_rows * sizeof(int));
+    if (transpose_table == NULL) {
+        free(after_t2_keyed);
+        free(line_Q_R_Sequenced);
+        free(straddle_line);
+        free(return_vals);
+        /* TODO - Send back an actual error (somehow) */
+        printf("ERROR - UNABLE TO ALLOCATE MEMORY");
+        return NULL;
+    }
     int t2_first = 10;
     int t2_second = 10;
     int t2_first_index = 0;
@@ -451,8 +454,8 @@ unsigned char* vic_decrypt(int ciphertext[], int personal_number, int date_numbe
     /* Cleanup */
     free(t1_finished);
     free(t2_finished);
-    free(after_t2_keyed);
     free(transpose_table);
+    free(after_t2_keyed);
     free(line_Q_R_Sequenced);
     free(straddle_line);
     free(return_vals);
